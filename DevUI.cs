@@ -7,17 +7,14 @@ using CitizenFX.Core;
 using CitizenFX.Core.UI;
 using NativeUI;
 
-namespace FRFuel
-{
-  public class DevUI
-  {
+namespace FRFuel {
+  public class DevUI {
     protected MenuPool menuPool;
     protected UIMenu mainMenu;
 
     protected UIMenuItem position;
 
-    public DevUI()
-    {
+    public DevUI() {
       menuPool = new MenuPool();
       mainMenu = new UIMenu("FRFuel dev menu", "things");
 
@@ -25,10 +22,8 @@ namespace FRFuel
 
       mainMenu.AddItem(position);
 
-      mainMenu.OnItemSelect += (sende, item, index) =>
-      {
-        if (item == position)
-        {
+      mainMenu.OnItemSelect += (sende, item, index) => {
+        if (item == position) {
           var pp = Game.PlayerPed.Position;
 
           BaseScript.TriggerServerEvent("frfuel:dev:savePosition", $"{pp.X};\t{pp.Y};\t{pp.Z}");
@@ -40,14 +35,12 @@ namespace FRFuel
       menuPool.RefreshIndex();
     }
 
-    public void OnTick()
-    {
+    public void OnTick() {
       position.Description = Game.PlayerPed.Position.ToString();
 
       menuPool.ProcessMenus();
 
-      if (Game.IsControlJustReleased(0, Control.InteractionMenu))
-      {
+      if (Game.IsControlJustReleased(0, Control.InteractionMenu)) {
         mainMenu.Visible = !mainMenu.Visible;
       }
     }
