@@ -46,6 +46,9 @@
     <Compile Include="FRFuel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include=".gitignore" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>copy /y $(TargetPath) C:\Games\FiveReborn\server\resources\frfuel</PostBuildEvent>
