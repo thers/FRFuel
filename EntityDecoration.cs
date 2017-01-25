@@ -36,11 +36,6 @@ namespace FRFuel {
     }
 
     public static T Get<T>(Entity entity, string propertyName) {
-      if (entity == null) {
-        Debug.WriteLine("Null reference detected");
-        throw new Exception("Null reference detected");
-      }
-
       if (!ExistOn(entity, propertyName)) {
         throw new EntityDecorationUnregisteredPropertyException();
       }
