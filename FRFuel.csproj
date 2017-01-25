@@ -47,7 +47,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DevUI.cs" />
+    <Compile Include="EntityDecoration.cs" />
     <Compile Include="FRFuel.cs" />
+    <Compile Include="ModMenu.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

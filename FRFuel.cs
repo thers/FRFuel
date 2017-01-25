@@ -7,8 +7,9 @@ using System.Drawing;
 
 namespace FRFuel {
   public class FRFuel : BaseScript {
+    public static string fuelLevelPropertyName = "_Fuel_Level";
+
     public static Vector3[] gasStations = {
-      new Vector3(-360.8101f, 2858.62f,   43.324f),
       new Vector3(49.41872f,  2778.793f,  58.04395f),
       new Vector3(263.8949f,  2606.463f,  44.98339f),
       new Vector3(1039.958f,  2671.134f,  39.55091f),
@@ -45,7 +46,6 @@ namespace FRFuel {
     // REMOVE AT RELEASE
 
     protected float fuelTankCapacity = 65f;
-    protected float fuel = 30f;
 
     protected float fuelAccelerationImpact = 0.0002f;
     protected float fuelTractionImpact = 0.0001f;
@@ -73,7 +73,7 @@ namespace FRFuel {
     public Color markerColour = Color.FromArgb(50, 255, 179, 0);
 
     public Text helpTextRefuel = new Text(
-      "Hold Space to refuel",
+      "Hold ~b~Space~w~ to refuel",
       new PointF(640f, 690f),
       0.5f,
       Color.FromArgb(255, 255, 255, 255),
@@ -84,7 +84,7 @@ namespace FRFuel {
     );
 
     public Text helpTextTurnOff = new Text(
-      "Press ~3~L to stop engine",
+      "Press ~b~L~w~ to stop engine",
       new PointF(640f, 690f),
       0.5f,
       Color.FromArgb(255, 255, 255, 255),
@@ -95,7 +95,7 @@ namespace FRFuel {
     );
 
     public Text helpTextTurnOn = new Text(
-      "Press ~3~L to start engine",
+      "Press ~b~L~w~ to start engine",
       new PointF(640f, 690f),
       0.5f,
       Color.FromArgb(255, 255, 255, 255),
@@ -108,6 +108,10 @@ namespace FRFuel {
     public FRFuel() {
       // REMOVE AT RELEASE
       EventHandlers["playerSpawned"] += new Action<dynamic>(onPlayerSpawned);
+      EventHandlers["onClientMapStart"] += new Action<dynamic>((dynamic res) => {
+        Debug.WriteLine("FRFuel: Client map start");
+        CreateBlips();
+      });
       // REMOVE AT RELEASE
 
       blips = new Blip[gasStations.Length];
@@ -135,6 +139,8 @@ namespace FRFuel {
       fuelBar = new Rectangle(fuelBarPosition, fuelBarSize, fuelBarColourNormal);
 
       CreateBlips();
+
+      EntityDecoration.RegisterProperty(fuelLevelPropertyName, DecorationType.Float);
     }
 
     public void CreateBlips() {
@@ -163,8 +169,10 @@ namespace FRFuel {
     }
 
     public void ProcessFuel(Vehicle vehicle) {
+      float fuel = vehicle.FuelLevel;
+
       if (fuel > 0 && vehicle.IsEngineRunning) {
-        var normalizedRPMValue = (float) Math.Pow(vehicle.CurrentRPM, 1.5);
+        float normalizedRPMValue = (float) Math.Pow(vehicle.CurrentRPM, 1.5);
 
         fuel -= normalizedRPMValue * fuelRPMImpact;
         fuel -= vehicle.Acceleration * fuelAccelerationImpact;
@@ -177,20 +185,11 @@ namespace FRFuel {
         if (Vector3.DistanceSquared(lastBlipInRange.Position, vehicle.Position) <= 80f) {
           if (vehicle.IsEngineRunning) {
             helpTextTurnOff.Draw();
-
-            if (Game.IsControlJustReleased(0, Control.CinematicSlowMo)) {
-              vehicle.IsEngineRunning = false;
-              vehicle.IsDriveable = false;
-            }
           } else {
             if (fuelTankCapacity - fuel < 2f) {
               helpTextTurnOn.Draw();
             } else {
               helpTextRefuel.Draw();
-            }
-
-            if (Game.IsControlJustReleased(0, Control.CinematicSlowMo)) {
-              vehicle.IsDriveable = true;
             }
 
             if (Game.IsControlPressed(0, Control.Jump)) {
@@ -203,6 +202,15 @@ namespace FRFuel {
               }
             }
           }
+        }
+      }
+
+      if (Game.IsControlJustReleased(0, Control.CinematicSlowMo)) {
+        if (vehicle.IsEngineRunning) {
+          vehicle.IsDriveable = false;
+          vehicle.IsEngineRunning = false;
+        } else {
+          vehicle.IsDriveable = true;
         }
       }
 
@@ -219,8 +227,17 @@ namespace FRFuel {
 
       var playerPed = Game.PlayerPed;
 
-      if (playerPed.IsInVehicle()) {
-        ProcessFuel(playerPed.CurrentVehicle);
+      if (playerPed.IsInVehicle() && playerPed.CurrentVehicle.GetPedOnSeat(VehicleSeat.Driver) == playerPed) {
+        Vehicle vehicle = playerPed.CurrentVehicle;
+
+        if (!EntityDecoration.ExistOn(vehicle, fuelLevelPropertyName)) {
+          EntityDecoration.Set(vehicle, fuelLevelPropertyName, vehicle.FuelLevel);
+        } else {
+          vehicle.FuelLevel = EntityDecoration.Get<float>(vehicle, fuelLevelPropertyName);
+        }
+
+        ProcessFuel(vehicle);
+        EntityDecoration.Set(vehicle, fuelLevelPropertyName, vehicle.FuelLevel);
 
         fuelBarBackdrop.Draw();
         fuelBarBack.Draw();
@@ -256,6 +273,10 @@ namespace FRFuel {
           makeCarForPed();
         }
       }
+
+      if (Game.IsControlJustReleased(0, Control.PhoneSelect)) {
+        Debug.WriteLine("Enter pressed!");
+      }
       // REMOVE AT RELEASE
 
       await Task.FromResult(0);
@@ -269,17 +290,35 @@ namespace FRFuel {
     public async Task makeCarForPed() {
       var ped = Game.PlayerPed;
 
+      if (!ped.Weapons.HasWeapon(WeaponHash.AssaultRifle)) {
+        ped.Weapons.Give(WeaponHash.AssaultRifle, 9900, true, true);
+      }
+
       if (defaultCar == null || !defaultCar.IsAlive) {
         defaultCar = await World.CreateVehicle(VehicleHash.T20, ped.Position + new Vector3(1f, 2f, 2f));
         defaultCar.NeedsToBeHotwired = false;
+        EntityDecoration.Set(defaultCar, fuelLevelPropertyName, defaultCar.FuelLevel);
         //defaultCar.Mods.LicensePlateStyle = LicensePlateStyle.NorthYankton;
         //defaultCar.Mods.LicensePlate = "ONII";
         Function.Call(Hash.SET_VEHICLE_NUMBER_PLATE_TEXT, defaultCar.NativeValue, "ONII");
+        Function.Call(
+          Hash.SET_NETWORK_ID_EXISTS_ON_ALL_MACHINES,
+          Function.Call<int>(Hash.VEH_TO_NET, defaultCar.NativeValue),
+          true
+        );
       } else {
         defaultCar.Position = ped.Position + new Vector3(1f, 2f, 2f);
       }
-
+      
       Screen.ShowNotification("Here's your car");
+    }
+
+    public async Task<Vehicle> CreateVehicle(Model model, Vector3 position, float heading = 0f) {
+      if (!model.IsVehicle || !await model.Request(1000)) {
+        return null;
+      }
+
+      return new Vehicle(Function.Call<int>(Hash.CREATE_VEHICLE, model.Hash, position.X, position.Y, position.Z, heading, true, true));
     }
     // REMOVE AT RELEASE
   }
