@@ -41,10 +41,6 @@ namespace FRFuel {
 
     protected Blip[] blips;
 
-    // REMOVE AT RELEASE
-    protected Vehicle defaultCar;
-    // REMOVE AT RELEASE
-
     protected float fuelTankCapacity = 65f;
 
     protected float fuelAccelerationImpact = 0.0002f;
@@ -61,10 +57,12 @@ namespace FRFuel {
     protected Rectangle fuelBarBack;
     protected Rectangle fuelBar;
 
+    protected Random random = new Random();
+
     public DevUI devUI;
 
     public float showMarkerInRangeSquared = 2500f;
-    public Blip lastBlipInRange;
+    public Blip currentGasStation;
 
     public Vector3 markerPutDown = new Vector3(0f, 0f, 3f);
     public Vector3 markerDir = new Vector3();
@@ -106,19 +104,11 @@ namespace FRFuel {
     );
 
     public FRFuel() {
-      // REMOVE AT RELEASE
-      EventHandlers["playerSpawned"] += new Action<dynamic>(onPlayerSpawned);
       EventHandlers["onClientMapStart"] += new Action<dynamic>((dynamic res) => {
-        Debug.WriteLine("FRFuel: Client map start");
         CreateBlips();
       });
-      // REMOVE AT RELEASE
 
       blips = new Blip[gasStations.Length];
-
-      devUI = new DevUI();
-
-      Tick += RenderBar;
 
       var fuelBarBackdropPosition = new PointF(20f, 569f); // Right above the radar HUD
       var fuelBarBackPosition = new PointF(20f, 572f);
@@ -139,10 +129,16 @@ namespace FRFuel {
       fuelBar = new Rectangle(fuelBarPosition, fuelBarSize, fuelBarColourNormal);
 
       CreateBlips();
+      devUI = new DevUI();
+
+      Tick += OnTick;
 
       EntityDecoration.RegisterProperty(fuelLevelPropertyName, DecorationType.Float);
     }
 
+    /// <summary>
+    /// Creates blips for gas stations
+    /// </summary>
     public void CreateBlips() {
       for (int i = 0; i < gasStations.Length; i++) {
         var blip = World.CreateBlip(gasStations[i]);
@@ -156,6 +152,12 @@ namespace FRFuel {
       }
     }
 
+    /// <summary>
+    /// Returns blip within given squared range
+    /// </summary>
+    /// <param name="pos"></param>
+    /// <param name="rangeSquared"></param>
+    /// <returns></returns>
     public Blip GetBlipInRange(Vector3 pos, float rangeSquared) {
       for (int i = 0; i < blips.Length; i++) {
         Vector3 blipPos = blips[i].Position;
@@ -168,9 +170,14 @@ namespace FRFuel {
       return null;
     }
 
-    public void ProcessFuel(Vehicle vehicle) {
+    /// <summary>
+    /// Processes fuel consumption
+    /// </summary>
+    /// <param name="vehicle"></param>
+    public void ConsumeFuel(Vehicle vehicle) {
       float fuel = vehicle.FuelLevel;
 
+      // Consuming
       if (fuel > 0 && vehicle.IsEngineRunning) {
         float normalizedRPMValue = (float) Math.Pow(vehicle.CurrentRPM, 1.5);
 
@@ -179,32 +186,43 @@ namespace FRFuel {
         fuel -= vehicle.MaxTraction * fuelTractionImpact;
       }
 
-      // If we have a close gas station
-      if (lastBlipInRange != null) {
-        // And ped is in range of 14
-        if (Vector3.DistanceSquared(lastBlipInRange.Position, vehicle.Position) <= 80f) {
-          if (vehicle.IsEngineRunning) {
-            helpTextTurnOff.Draw();
+      // Refueling
+      if (
+        // If we have gas station near us
+        currentGasStation != null &&
+        // And ped is in range of sqrt(80) to it
+        Vector3.DistanceSquared(currentGasStation.Position, vehicle.Position) <= 80f
+      ) {
+        if (vehicle.IsEngineRunning) {
+          helpTextTurnOff.Draw();
+        } else {
+          if (fuelTankCapacity - fuel < 2f) {
+            helpTextTurnOn.Draw();
           } else {
-            if (fuelTankCapacity - fuel < 2f) {
-              helpTextTurnOn.Draw();
-            } else {
-              helpTextRefuel.Draw();
+            helpTextRefuel.Draw();
+          }
+
+          if (Game.IsControlPressed(0, Control.Jump)) {
+            if (fuel < fuelTankCapacity) {
+              fuel += 0.1f;
             }
 
-            if (Game.IsControlPressed(0, Control.Jump)) {
-              if (fuel < fuelTankCapacity) {
-                fuel += 0.1f;
-              }
-
-              if (fuel > fuelTankCapacity) {
-                fuel = fuelTankCapacity;
-              }
+            if (fuel > fuelTankCapacity) {
+              fuel = fuelTankCapacity;
             }
           }
         }
       }
 
+      vehicle.FuelLevel = fuel;
+      EntityDecoration.Set(vehicle, fuelLevelPropertyName, fuel);
+    }
+
+    /// <summary>
+    /// Controls engine
+    /// </summary>
+    /// <param name="vehicle"></param>
+    public void ControlEngine(Vehicle vehicle) {
       if (Game.IsControlJustReleased(0, Control.CinematicSlowMo)) {
         if (vehicle.IsEngineRunning) {
           vehicle.IsDriveable = false;
@@ -213,113 +231,108 @@ namespace FRFuel {
           vehicle.IsDriveable = true;
         }
       }
-
-      vehicle.FuelLevel = fuel;
-
-      fuelBar.Size = new SizeF(
-        (fuelBarWidth / 100f) * ((100f / fuelTankCapacity) * fuel),
-        fuelBarHeight
-      );
     }
 
-    public async Task RenderBar() {
+    /// <summary>
+    /// Renders fuel bar and marker
+    /// </summary>
+    /// <param name="playerPed"></param>
+    public void RenderUI(Ped playerPed) {
+      fuelBar.Size = new SizeF(
+        (fuelBarWidth / 100f) * ((100f / fuelTankCapacity) * playerPed.CurrentVehicle.FuelLevel),
+        fuelBarHeight
+      );
+
+      fuelBarBackdrop.Draw();
+      fuelBarBack.Draw();
+      fuelBar.Draw();
+
+      Blip blipInRange = GetBlipInRange(playerPed.Position, showMarkerInRangeSquared);
+
+      if (blipInRange != null) {
+        World.DrawMarker(
+          MarkerType.VerticalCylinder,
+          blipInRange.Position - markerPutDown,
+          markerDir,
+          markerRot,
+          markerScale,
+          markerColour
+        );
+
+        if (blipInRange != currentGasStation) {
+          // Found blip in range
+          currentGasStation = blipInRange;
+        }
+      } else {
+        if (currentGasStation != null) {
+          // Lost blip in range
+          currentGasStation = null;
+        }
+      }
+    }
+
+    protected bool initialized = false;
+
+    /// <summary>
+    /// Inits fuel for given vehicle
+    /// </summary>
+    /// <param name="vehicle"></param>
+    public void InitFuel(Vehicle vehicle) {
+      initialized = true;
+
+      if (!EntityDecoration.ExistOn(vehicle, fuelLevelPropertyName)) {
+        EntityDecoration.Set(
+          vehicle,
+          fuelLevelPropertyName,
+          RandomizeFuelLevel(vehicle.FuelLevel)
+        );
+      }
+
+      vehicle.FuelLevel = EntityDecoration.Get<float>(vehicle, fuelLevelPropertyName);
+    }
+
+    /// <summary>
+    /// Returns random fuel level between 1/3 and 3/4 of tank capacity
+    /// </summary>
+    /// <param name="fuelLevel"></param>
+    /// <returns></returns>
+    public float RandomizeFuelLevel(float fuelLevel) {
+      float min = fuelLevel / 3f;
+      float max = fuelLevel - (fuelLevel / 4);
+
+      return (float) ((random.NextDouble() * (max - min)) + min);
+    }
+
+    /// <summary>
+    /// On tick
+    /// </summary>
+    /// <returns></returns>
+    public async Task OnTick() {
       devUI.OnTick();
 
       var playerPed = Game.PlayerPed;
 
-      if (playerPed.IsInVehicle() && playerPed.CurrentVehicle.GetPedOnSeat(VehicleSeat.Driver) == playerPed) {
+      if (
+        playerPed.IsInVehicle() &&
+        playerPed.CurrentVehicle.GetPedOnSeat(VehicleSeat.Driver) == playerPed &&
+        playerPed.CurrentVehicle.IsAlive
+      ) {
         Vehicle vehicle = playerPed.CurrentVehicle;
 
-        if (!EntityDecoration.ExistOn(vehicle, fuelLevelPropertyName)) {
-          EntityDecoration.Set(vehicle, fuelLevelPropertyName, vehicle.FuelLevel);
-        } else {
-          vehicle.FuelLevel = EntityDecoration.Get<float>(vehicle, fuelLevelPropertyName);
+        if (!initialized) {
+          initialized = true;
+          InitFuel(vehicle);
         }
 
-        ProcessFuel(vehicle);
-        EntityDecoration.Set(vehicle, fuelLevelPropertyName, vehicle.FuelLevel);
+        ControlEngine(vehicle);
+        ConsumeFuel(vehicle);
 
-        fuelBarBackdrop.Draw();
-        fuelBarBack.Draw();
-        fuelBar.Draw();
-
-        Blip blipInRange = GetBlipInRange(playerPed.Position, showMarkerInRangeSquared);
-
-        if (blipInRange != null) {
-          World.DrawMarker(
-            MarkerType.VerticalCylinder,
-            blipInRange.Position - markerPutDown,
-            markerDir,
-            markerRot,
-            markerScale,
-            markerColour
-          );
-
-          if (blipInRange != lastBlipInRange) {
-            // Found blip in range
-            lastBlipInRange = blipInRange;
-          }
-        } else {
-          if (lastBlipInRange != null) {
-            // Lost blip in range
-            lastBlipInRange = null;
-          }
-        }
+        RenderUI(playerPed);
+      } else {
+        initialized = false;
       }
-
-      // REMOVE AT RELEASE
-      else {
-        if (Game.IsControlJustReleased(0, Control.Phone)) {
-          makeCarForPed();
-        }
-      }
-
-      if (Game.IsControlJustReleased(0, Control.PhoneSelect)) {
-        Debug.WriteLine("Enter pressed!");
-      }
-      // REMOVE AT RELEASE
 
       await Task.FromResult(0);
     }
-
-    // REMOVE AT RELEASE
-    public void onPlayerSpawned(dynamic pos) {
-      makeCarForPed();
-    }
-
-    public async Task makeCarForPed() {
-      var ped = Game.PlayerPed;
-
-      if (!ped.Weapons.HasWeapon(WeaponHash.AssaultRifle)) {
-        ped.Weapons.Give(WeaponHash.AssaultRifle, 9900, true, true);
-      }
-
-      if (defaultCar == null || !defaultCar.IsAlive) {
-        defaultCar = await World.CreateVehicle(VehicleHash.T20, ped.Position + new Vector3(1f, 2f, 2f));
-        defaultCar.NeedsToBeHotwired = false;
-        EntityDecoration.Set(defaultCar, fuelLevelPropertyName, defaultCar.FuelLevel);
-        //defaultCar.Mods.LicensePlateStyle = LicensePlateStyle.NorthYankton;
-        //defaultCar.Mods.LicensePlate = "ONII";
-        Function.Call(Hash.SET_VEHICLE_NUMBER_PLATE_TEXT, defaultCar.NativeValue, "ONII");
-        Function.Call(
-          Hash.SET_NETWORK_ID_EXISTS_ON_ALL_MACHINES,
-          Function.Call<int>(Hash.VEH_TO_NET, defaultCar.NativeValue),
-          true
-        );
-      } else {
-        defaultCar.Position = ped.Position + new Vector3(1f, 2f, 2f);
-      }
-      
-      Screen.ShowNotification("Here's your car");
-    }
-
-    public async Task<Vehicle> CreateVehicle(Model model, Vector3 position, float heading = 0f) {
-      if (!model.IsVehicle || !await model.Request(1000)) {
-        return null;
-      }
-
-      return new Vehicle(Function.Call<int>(Hash.CREATE_VEHICLE, model.Hash, position.X, position.Y, position.Z, heading, true, true));
-    }
-    // REMOVE AT RELEASE
   }
 }

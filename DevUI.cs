@@ -15,8 +15,8 @@ namespace FRFuel {
 
     protected UIMenuItem position;
     protected UIMenuItem isDriver;
-    protected UIMenuItem vehicleId;
-    protected UIMenuItem vehicleIdControl;
+    protected UIMenuItem vehicleModelId;
+    protected UIMenuItem vehicleFuelTank;
     protected UIMenuItem netVehicleIdExist;
     protected UIMenuItem netVehicleId;
     protected UIMenuItem netVehicleIdControl;
@@ -26,52 +26,25 @@ namespace FRFuel {
       menuPool = new MenuPool();
       mainMenu = new UIMenu("FRFuel dev menu", "things");
 
-      isDriver = new UIMenuItem("Is driver");
-      isDriver.Enabled = false;
-
       position = new UIMenuItem("Pos");
       position.Enabled = false;
 
-      vehicleId = new UIMenuItem("Vehicle ID");
-      vehicleId.Enabled = false;
+      vehicleModelId = new UIMenuItem("Vehicle model ID");
+      vehicleModelId.Enabled = false;
 
-      vehicleIdControl = new UIMenuItem("Vehicle ID control");
-      vehicleIdControl.Enabled = false;
-
-      netVehicleId = new UIMenuItem("Network vehicle ID");
-      netVehicleId.Enabled = false;
-
-      netVehicleIdExist = new UIMenuItem("Network vehicle ID exist");
-      netVehicleIdExist.Enabled = false;
-
-      netVehicleIdControl = new UIMenuItem("Network vehicle ID control");
-      netVehicleIdControl.Enabled = false;
-
-      decoration = new UIMenuItem("Decoration");
-      decoration.Enabled = false;
+      vehicleFuelTank = new UIMenuItem("Vehicle fuel tank");
 
       mainMenu.AddItem(position);
-      mainMenu.AddItem(isDriver);
-      mainMenu.AddItem(vehicleId);
-      mainMenu.AddItem(vehicleIdControl);
-      mainMenu.AddItem(netVehicleId);
-      mainMenu.AddItem(netVehicleIdExist);
-      mainMenu.AddItem(netVehicleIdControl);
-      mainMenu.AddItem(decoration);
+      mainMenu.AddItem(vehicleModelId);
+      mainMenu.AddItem(vehicleFuelTank);
 
       mainMenu.OnItemSelect += (sende, item, index) => {
-        if (item == position) {
-          var pp = Game.PlayerPed.Position;
-
-          var px = pp.X.ToString().Replace(",", ".");
-          var py = pp.Y.ToString().Replace(",", ".");
-          var pz = pp.Z.ToString().Replace(",", ".");
-
+        if (item == vehicleFuelTank && Game.PlayerPed.IsInVehicle()) {
           BaseScript.TriggerServerEvent(
-            "frfuel:dev:savePosition",
-            "spawnpoint 'a_m_y_skater_01' { x = " + px + ", y = " + py + ", z = " + pz + "}"
+            "frfuel:dev:saveFuel",
+            "dict.add(" + Game.PlayerPed.CurrentVehicle.Model.Hash.ToString() + ", " + Game.PlayerPed.CurrentVehicle.FuelLevel.ToString() + ")"
           );
-          Screen.ShowNotification("Position saved");
+          Screen.ShowNotification("Fuel to model saved");
         }
       };
 
@@ -84,45 +57,12 @@ namespace FRFuel {
 
       if (Game.PlayerPed.IsInVehicle()) {
         Vehicle vehicle = Game.PlayerPed.CurrentVehicle;
-
-        int vehicleNetworkId = Function.Call<int>(Hash.VEH_TO_NET/*NETWORK_GET_NETWORK_ID_FROM_ENTITY*/, vehicle.NativeValue);
-        bool isNetworkIdExist = Function.Call<bool>(Hash.NETWORK_DOES_NETWORK_ID_EXIST, vehicleNetworkId);
-        bool isControllingVehicle = Function.Call<bool>(Hash.NETWORK_HAS_CONTROL_OF_ENTITY, vehicle.NativeValue);
-        bool isControllingNetworkId = Function.Call<bool>(Hash.NETWORK_HAS_CONTROL_OF_NETWORK_ID, vehicleNetworkId);
-
-        if (!isControllingVehicle) {
-          //Function.Call(Hash.NETWORK_REQUEST_CONTROL_OF_ENTITY, vehicle.NativeValue);
-        }
-
-        if (isNetworkIdExist) {
-          //Function.Call(Hash.SET_NETWORK_ID_CAN_MIGRATE, vehicleNetworkId, true);
-          //Function.Call(Hash.NETWORK_UNREGISTER_NETWORKED_ENTITY, vehicle.NativeValue);
-        }
-
-        //if (!isNetworkIdExist) {
-        //
-        //}
-
-        isDriver.SetRightLabel(Game.PlayerPed.CurrentVehicle.GetPedOnSeat(VehicleSeat.Driver) == Game.PlayerPed ? "Yes" : "No");
-        vehicleId.SetRightLabel(vehicle.NativeValue.ToString());
-        vehicleIdControl.SetRightLabel(isControllingVehicle ? "Yes" : "No");
-        netVehicleId.SetRightLabel(vehicleNetworkId.ToString());
-        netVehicleIdExist.SetRightLabel(isNetworkIdExist ? "Yes" : "No");
-        netVehicleIdControl.SetRightLabel(isControllingNetworkId ? "Yes" : "No");
-
-        try {
-          decoration.SetRightLabel(EntityDecoration.Get<float>(vehicle, "_Fuel_Level").ToString());
-        } catch(EntityDecorationUnregisteredPropertyException e) {
-          decoration.SetRightLabel("Unregistered prop");
-        }
+        
+        vehicleModelId.SetRightLabel(vehicle.DisplayName.ToString());
+        vehicleFuelTank.SetRightLabel(vehicle.FuelLevel.ToString());
       } else {
-        isDriver.SetRightLabel("ped or not driver");
-        vehicleId.SetRightLabel("ped or not driver");
-        vehicleIdControl.SetRightLabel("ped or not driver");
-        netVehicleId.SetRightLabel("ped or not driver");
-        netVehicleIdExist.SetRightLabel("ped or not driver");
-        netVehicleIdControl.SetRightLabel("ped or not driver");
-        decoration.SetRightLabel("ped or not driver");
+        vehicleModelId.SetRightLabel("ped or not driver");
+        vehicleFuelTank.SetRightLabel("ped or not driver");
       }
 
       mainMenu.MouseControlsEnabled = false;
