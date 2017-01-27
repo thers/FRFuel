@@ -17,7 +17,7 @@ namespace FRFuel {
     protected UIMenuItem isDriver;
     protected UIMenuItem vehicleModelId;
     protected UIMenuItem vehicleFuelTank;
-    protected UIMenuItem netVehicleIdExist;
+    protected UIMenuItem knownVehicle;
     protected UIMenuItem netVehicleId;
     protected UIMenuItem netVehicleIdControl;
     protected UIMenuItem decoration;
@@ -32,9 +32,13 @@ namespace FRFuel {
       vehicleModelId = new UIMenuItem("Vehicle model ID");
       vehicleModelId.Enabled = false;
 
+      knownVehicle = new UIMenuItem("Is known vehicle");
+      knownVehicle.Enabled = false;
+
       vehicleFuelTank = new UIMenuItem("Vehicle fuel tank");
 
       mainMenu.AddItem(position);
+      mainMenu.AddItem(knownVehicle);
       mainMenu.AddItem(vehicleModelId);
       mainMenu.AddItem(vehicleFuelTank);
 
@@ -42,7 +46,7 @@ namespace FRFuel {
         if (item == vehicleFuelTank && Game.PlayerPed.IsInVehicle()) {
           BaseScript.TriggerServerEvent(
             "frfuel:dev:saveFuel",
-            "dict.add(" + Game.PlayerPed.CurrentVehicle.Model.Hash.ToString() + ", " + Game.PlayerPed.CurrentVehicle.FuelLevel.ToString() + ")"
+            "{" + Game.PlayerPed.CurrentVehicle.Model.Hash.ToString() + ", " + Game.PlayerPed.CurrentVehicle.FuelLevel.ToString() + "f},"
           );
           Screen.ShowNotification("Fuel to model saved");
         }
@@ -57,7 +61,8 @@ namespace FRFuel {
 
       if (Game.PlayerPed.IsInVehicle()) {
         Vehicle vehicle = Game.PlayerPed.CurrentVehicle;
-        
+
+        knownVehicle.SetRightLabel(VehiclesPetrolTanks.dict.ContainsKey(vehicle.Model.Hash) ? "Yes" : "No");
         vehicleModelId.SetRightLabel(vehicle.DisplayName.ToString());
         vehicleFuelTank.SetRightLabel(vehicle.FuelLevel.ToString());
       } else {

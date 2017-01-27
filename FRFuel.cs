@@ -2,8 +2,8 @@
 using System.Threading.Tasks;
 using CitizenFX.Core;
 using CitizenFX.Core.UI;
-using CitizenFX.Core.Native;
 using System.Drawing;
+using TinyTween;
 
 namespace FRFuel {
   public class FRFuel : BaseScript {
@@ -103,6 +103,8 @@ namespace FRFuel {
       true
     );
 
+    protected Tween<float> fuelBarColorTween =new FloatTween();
+
     public FRFuel() {
       EventHandlers["onClientMapStart"] += new Action<dynamic>((dynamic res) => {
         CreateBlips();
@@ -121,8 +123,8 @@ namespace FRFuel {
       var fuelBarBackdropColour = Color.FromArgb(100, 0, 0, 0);
       var fuelBarBackColour = Color.FromArgb(50, 255, 179, 0);
 
-      fuelBarColourNormal = Color.FromArgb(100, 255, 179, 0);
-      fuelBarColourNormal = Color.FromArgb(255, 255, 179, 0);
+      fuelBarColourNormal = Color.FromArgb(150, 255, 179, 0);
+      fuelBarColourWarning = Color.FromArgb(255, 255, 245, 220);
 
       fuelBarBackdrop = new Rectangle(fuelBarBackdropPosition, fuelBarBackdropSize, fuelBarBackdropColour);
       fuelBarBack = new Rectangle(fuelBarBackPosition, fuelBarBackSize, fuelBarBackColour);
@@ -233,15 +235,42 @@ namespace FRFuel {
       }
     }
 
+    protected bool fuelBarAnimationDir = true;
+
     /// <summary>
     /// Renders fuel bar and marker
     /// </summary>
     /// <param name="playerPed"></param>
     public void RenderUI(Ped playerPed) {
+      float fuelLevelPercentage = (100f / fuelTankCapacity) * playerPed.CurrentVehicle.FuelLevel;
+
       fuelBar.Size = new SizeF(
-        (fuelBarWidth / 100f) * ((100f / fuelTankCapacity) * playerPed.CurrentVehicle.FuelLevel),
+        (fuelBarWidth / 100f) * fuelLevelPercentage,
         fuelBarHeight
       );
+
+      if (fuelTankCapacity > 0 && playerPed.CurrentVehicle.FuelLevel < 9f) {
+        if (fuelBarColorTween.State == TweenState.Stopped) {
+          fuelBarAnimationDir = !fuelBarAnimationDir;
+
+          fuelBarColorTween.Start(
+            fuelBarAnimationDir ? 100f : 255f,
+            fuelBarAnimationDir ? 255f : 100f,
+            .5f, // seconds
+            ScaleFuncs.QuarticEaseOut
+            );
+        }
+        
+        fuelBarColorTween.Update(Game.LastFrameTime);
+
+        fuelBar.Color = Color.FromArgb((int) Math.Floor(fuelBarColorTween.CurrentValue), fuelBarColourWarning);
+      } else {
+        fuelBar.Color = fuelBarColourNormal;
+
+        if (fuelBarColorTween.State != TweenState.Stopped) {
+          fuelBarColorTween.Stop(StopBehavior.ForceComplete);
+        }
+      }
 
       fuelBarBackdrop.Draw();
       fuelBarBack.Draw();
@@ -280,6 +309,12 @@ namespace FRFuel {
     public void InitFuel(Vehicle vehicle) {
       initialized = true;
 
+      if (VehiclesPetrolTanks.Has(vehicle)) {
+        fuelTankCapacity = VehiclesPetrolTanks.Get(vehicle);
+      } else {
+        fuelTankCapacity = 65f;
+      }
+
       if (!EntityDecoration.ExistOn(vehicle, fuelLevelPropertyName)) {
         EntityDecoration.Set(
           vehicle,
@@ -314,13 +349,17 @@ namespace FRFuel {
 
       if (
         playerPed.IsInVehicle() &&
+        (
+          playerPed.CurrentVehicle.Model.IsCar ||
+          playerPed.CurrentVehicle.Model.IsBike ||
+          playerPed.CurrentVehicle.Model.IsQuadbike
+        ) &&
         playerPed.CurrentVehicle.GetPedOnSeat(VehicleSeat.Driver) == playerPed &&
         playerPed.CurrentVehicle.IsAlive
       ) {
         Vehicle vehicle = playerPed.CurrentVehicle;
 
         if (!initialized) {
-          initialized = true;
           InitFuel(vehicle);
         }
 

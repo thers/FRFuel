@@ -51,6 +51,8 @@
     <Compile Include="FRFuel.cs" />
     <Compile Include="ModMenu.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TinyTween.cs" />
+    <Compile Include="VehiclesPetrolTanks.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
