@@ -1,4 +1,4 @@
-﻿# FRFuel
+# FRFuel
 
 ## Features
 
