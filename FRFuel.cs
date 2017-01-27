@@ -59,7 +59,9 @@ namespace FRFuel {
 
     protected Random random = new Random();
 
-    public DevUI devUI;
+#if DEBUG
+    public DevUI devUI = new DevUI();
+#endif
 
     public float showMarkerInRangeSquared = 2500f;
     public Blip currentGasStation;
@@ -131,7 +133,6 @@ namespace FRFuel {
       fuelBar = new Rectangle(fuelBarPosition, fuelBarSize, fuelBarColourNormal);
 
       CreateBlips();
-      devUI = new DevUI();
 
       Tick += OnTick;
 
@@ -343,7 +344,9 @@ namespace FRFuel {
     /// </summary>
     /// <returns></returns>
     public async Task OnTick() {
+#if DEBUG
       devUI.OnTick();
+#endif
 
       var playerPed = Game.PlayerPed;
 
