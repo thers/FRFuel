@@ -68,6 +68,9 @@ namespace FRFuel {
       }
     }
 
+    /// <summary>
+    /// Creates jerry cans pick-ups at the gas stations
+    /// </summary>
     public void CreateJerryCanPickUps() {
       int model = 883325847;
 
@@ -290,7 +293,7 @@ namespace FRFuel {
           if (max - current < 0.5f) {
             hud.helpTextJerryCan.Caption = "Fuel tank is full";
           } else {
-            hud.helpTextJerryCan.Caption = "Hold ~b~L~w~ to refuel this car";
+            hud.helpTextJerryCan.Caption = "Spill to refuel this car";
           }
 
           if (Game.IsControlPressed(0, Control.VehicleAttack)) {
