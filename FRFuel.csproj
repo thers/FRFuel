@@ -14,12 +14,13 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -33,7 +34,8 @@
     <Reference Include="CitizenFX.Core">
       <HintPath>..\..\..\..\client\citizen\clr2\lib\mono\4.5\CitizenFX.Core.dll</HintPath>
     </Reference>
-    <Reference Include="nativeui.net">
+    <Reference Include="nativeui.net, Version=1.7.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\frfuel\nativeui.net.dll</HintPath>
     </Reference>
     <Reference Include="System" />
@@ -46,9 +48,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DevUI.cs" />
+    <Compile Include="DevMenu.cs" />
     <Compile Include="EntityDecoration.cs" />
     <Compile Include="FRFuel.cs" />
+    <Compile Include="GasStations.cs" />
+    <Compile Include="HUD.cs" />
     <Compile Include="ModMenu.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TinyTween.cs" />
@@ -56,6 +60,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
+    <None Include="LICENSE.md" />
+    <None Include="README.md" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

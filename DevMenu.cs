@@ -5,11 +5,10 @@ using System.Text;
 using System.Threading.Tasks;
 using CitizenFX.Core;
 using CitizenFX.Core.UI;
-using CitizenFX.Core.Native;
 using NativeUI;
 
-namespace FRFuel {
-  public class DevUI {
+namespace FRFuel.Dev {
+  public class DevMenu {
     protected MenuPool menuPool;
     protected UIMenu mainMenu;
 
@@ -22,7 +21,7 @@ namespace FRFuel {
     protected UIMenuItem netVehicleIdControl;
     protected UIMenuItem decoration;
 
-    public DevUI() {
+    public DevMenu() {
       menuPool = new MenuPool();
       mainMenu = new UIMenu("FRFuel dev menu", "things");
 
