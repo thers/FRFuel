@@ -8,7 +8,6 @@ namespace FRFuel {
   public class FRFuel : BaseScript {
     public static string fuelLevelPropertyName = "_Fuel_Level";
     public static string manualRefuelAnimDict = "weapon@w_sp_jerrycan";
-    public static string manualRefuelAnimName = "fire";
 
     protected Blip[] blips;
     protected Pickup[] pickups;
@@ -33,11 +32,19 @@ namespace FRFuel {
     protected Vehicle lastVehicle;
     protected bool currentVehicleFuelLevelInitialized = false;
 
+    protected InLoopOutAnimation jerryCanAnimation;
+
     public FRFuel() {
 #if DEBUG
       menu = new Dev.DevMenu();
 #endif
       hud = new HUD();
+
+      jerryCanAnimation = new InLoopOutAnimation(
+        new Animation(manualRefuelAnimDict, "fire_intro"),
+        new Animation(manualRefuelAnimDict, "fire"),
+        new Animation(manualRefuelAnimDict, "fire_outro")
+      );
 
       EventHandlers["onClientMapStart"] += new Action<dynamic>((dynamic res) => {
         CreateBlips();
@@ -300,8 +307,7 @@ namespace FRFuel {
           }
 
           if (Game.IsControlPressed(0, Control.VehicleAttack)) {
-            playerPed.Task.TurnTo(vehicle);
-            playerPed.Task.PlayAnimation(manualRefuelAnimDict, manualRefuelAnimName);
+            jerryCanAnimation.Magick(playerPed);
 
             if (current < max) {
               if (current + 0.1f >= max) {
@@ -313,8 +319,7 @@ namespace FRFuel {
           }
 
           if (Game.IsControlJustReleased(0, Control.VehicleAttack)) {
-            playerPed.Task.ClearAnimation(manualRefuelAnimDict, manualRefuelAnimName);
-            playerPed.Task.ClearAll();
+            jerryCanAnimation.RewindAndStop(playerPed);
           }
         }
       }
