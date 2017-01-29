@@ -2,10 +2,13 @@
 using System.Threading.Tasks;
 using CitizenFX.Core;
 using CitizenFX.Core.Native;
+using CitizenFX.Core.UI;
 
 namespace FRFuel {
   public class FRFuel : BaseScript {
     public static string fuelLevelPropertyName = "_Fuel_Level";
+    public static string manualRefuelAnimDict = "weapon@w_sp_jerrycan";
+    public static string manualRefuelAnimName = "fire";
 
     protected Blip[] blips;
     protected Pickup[] pickups;
@@ -298,6 +301,7 @@ namespace FRFuel {
 
           if (Game.IsControlPressed(0, Control.VehicleAttack)) {
             playerPed.Task.TurnTo(vehicle);
+            playerPed.Task.PlayAnimation(manualRefuelAnimDict, manualRefuelAnimName);
 
             if (current < max) {
               if (current + 0.1f >= max) {
@@ -309,6 +313,7 @@ namespace FRFuel {
           }
 
           if (Game.IsControlJustReleased(0, Control.VehicleAttack)) {
+            playerPed.Task.ClearAnimation(manualRefuelAnimDict, manualRefuelAnimName);
             playerPed.Task.ClearAll();
           }
         }
