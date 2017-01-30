@@ -35,7 +35,7 @@ namespace FRFuel {
     );
 
     public Text helpTextTurnOff = new Text(
-      "Press ~b~L~w~ to stop engine",
+      "~b~Horn~w~ to stop engine",
       new PointF(640f, 690f),
       0.5f,
       Color.FromArgb(255, 255, 255, 255),
@@ -46,7 +46,7 @@ namespace FRFuel {
     );
 
     public Text helpTextTurnOn = new Text(
-      "Press ~b~L~w~ to start engine",
+      "~b~Horn~w~ to start engine",
       new PointF(640f, 690f),
       0.5f,
       Color.FromArgb(255, 255, 255, 255),

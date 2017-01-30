@@ -142,6 +142,10 @@ namespace FRFuel {
         // And ped is in range of sqrt(80) to it
         Vector3.DistanceSquared(currentGasStation.Position, vehicle.Position) <= 80f
       ) {
+        if (vehicle.Speed < 0.1f) {
+          ControlEngine(vehicle);
+        }
+
         if (vehicle.IsEngineRunning) {
           hud.helpTextTurnOff.Draw();
         } else {
@@ -167,7 +171,7 @@ namespace FRFuel {
     /// </summary>
     /// <param name="vehicle"></param>
     public void ControlEngine(Vehicle vehicle) {
-      if (Game.IsControlJustReleased(0, Control.CinematicSlowMo)) {
+      if (Game.IsControlJustReleased(0, Control.VehicleHorn)) {
         if (vehicle.IsEngineRunning) {
           vehicle.IsDriveable = false;
           vehicle.IsEngineRunning = false;
@@ -357,7 +361,6 @@ namespace FRFuel {
           InitFuel(vehicle);
         }
 
-        ControlEngine(vehicle);
         ConsumeFuel(vehicle);
         RenderUI(playerPed);
 

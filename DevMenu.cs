@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 using CitizenFX.Core;
 using CitizenFX.Core.UI;
 using NativeUI;
+using System.Drawing;
+using System.Security;
+using CitizenFX.Core.Native;
 
 namespace FRFuel.Dev {
   public class DevMenu {
@@ -13,13 +16,15 @@ namespace FRFuel.Dev {
     protected UIMenu mainMenu;
 
     protected UIMenuItem position;
-    protected UIMenuItem isDriver;
     protected UIMenuItem vehicleModelId;
     protected UIMenuItem vehicleFuelTank;
     protected UIMenuItem knownVehicle;
+
     protected UIMenuItem netVehicleId;
     protected UIMenuItem netVehicleIdControl;
     protected UIMenuItem decoration;
+
+    protected Text txt = new Text("", new PointF(600f, 100f), .5f);
 
     public DevMenu() {
       menuPool = new MenuPool();
@@ -54,7 +59,7 @@ namespace FRFuel.Dev {
       menuPool.Add(mainMenu);
       menuPool.RefreshIndex();
     }
-
+    
     public void OnTick() {
       position.Text = "Pos: " + Game.PlayerPed.Position.ToString();
 
