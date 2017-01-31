@@ -336,6 +336,8 @@ namespace FRFuel {
     public async Task OnTick() {
 #if DEBUG
       menu.OnTick();
+
+      //HUD.DrawScaleform();
 #endif
 
       Ped playerPed = Game.PlayerPed;

@@ -78,8 +78,10 @@ namespace FRFuel {
       }
     }
 
+    protected PointF basePosition = new PointF(0f, 584f);
+
     public HUD() {
-      PointF fuelBarBackdropPosition = new PointF(20f, 569f);
+      PointF fuelBarBackdropPosition = basePosition;
       PointF fuelBarBackPosition = new PointF(fuelBarBackdropPosition.X, fuelBarBackdropPosition.Y + 3f);
       PointF fuelBarPosition = fuelBarBackPosition;
 
@@ -100,6 +102,9 @@ namespace FRFuel {
 
     public void RenderBar(float currentFuelLevel, float maxFuelLevel) {
       float fuelLevelPercentage = (100f / maxFuelLevel) * currentFuelLevel;
+      PointF safeZone = GetSafezoneBounds();
+
+      Position = new PointF(basePosition.X + safeZone.X, basePosition.Y - safeZone.Y);
 
       fuelBar.Size = new SizeF(
         (fuelBarWidth / 100f) * fuelLevelPercentage,
@@ -134,6 +139,15 @@ namespace FRFuel {
       fuelBar.Draw();
     }
 
+    public static PointF GetSafezoneBounds() {
+      float t = Function.Call<float>(Hash.GET_SAFE_ZONE_SIZE);
+
+      return new PointF(
+        (int) Math.Round((1280 - (1280 * t)) / 2),
+        (int) Math.Round((720 - (720 * t)) / 2)
+      );
+    }
+
     public void RenderMarker(Vector3 pos) {
       World.DrawMarker(
           MarkerType.VerticalCylinder,
@@ -143,6 +157,22 @@ namespace FRFuel {
           markerScale,
           markerColour
       );
+    }
+
+    public static void DrawScaleform() {
+      var scaleform = new Scaleform("instructional_buttons");
+      scaleform.CallFunction("CLEAR_ALL");
+      scaleform.CallFunction("TOGGLE_MOUSE_BUTTONS", 0);
+      scaleform.CallFunction("CREATE_CONTAINER");
+
+      scaleform.CallFunction("SET_DATA_SLOT", 0, Function.Call<string>((Hash) 0x0499D7B09FC9B407, 2, (int) Control.Jump, 0), "t1");
+      scaleform.CallFunction("SET_DATA_SLOT", 1, Function.Call<string>((Hash) 0x0499D7B09FC9B407, 2, (int) Control.FrontendCancel, 0), "t2");
+      scaleform.CallFunction("SET_DATA_SLOT", 2, Function.Call<string>((Hash) 0x0499D7B09FC9B407, 2, (int) Control.PhoneRight, 0), "");
+      scaleform.CallFunction("SET_DATA_SLOT", 3, Function.Call<string>((Hash) 0x0499D7B09FC9B407, 2, (int) Control.PhoneLeft, 0), "t3");
+      scaleform.CallFunction("SET_DATA_SLOT", 4, Function.Call<string>((Hash) 0x0499D7B09FC9B407, 2, (int) Control.FrontendRb, 0), "");
+      scaleform.CallFunction("SET_DATA_SLOT", 5, Function.Call<string>((Hash) 0x0499D7B09FC9B407, 2, (int) Control.FrontendLb, 0), "t4");
+      scaleform.CallFunction("DRAW_INSTRUCTIONAL_BUTTONS", -1);
+      scaleform.Render2D();
     }
   }
 }
