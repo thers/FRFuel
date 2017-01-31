@@ -2,11 +2,14 @@
 using CitizenFX.Core;
 using CitizenFX.Core.UI;
 using CitizenFX.Core.Native;
+using System.Threading.Tasks;
 using System.Drawing;
 using TinyTween;
 
 namespace FRFuel {
   public class HUD {
+    protected Scaleform buttons = new Scaleform("instructional_buttons");
+
     protected float fuelBarWidth = 180f;
     protected float fuelBarHeight = 6f;
 
@@ -23,52 +26,9 @@ namespace FRFuel {
     public Vector3 markerScale = new Vector3(15f);
     public Color markerColour = Color.FromArgb(50, 255, 179, 0);
 
-    public Text helpTextRefuel = new Text(
-      "Hold ~b~Space~w~ to refuel",
-      new PointF(640f, 690f),
-      0.5f,
-      Color.FromArgb(255, 255, 255, 255),
-      Font.ChaletLondon,
-      Alignment.Center,
-      false,
-      true
-    );
-
-    public Text helpTextTurnOff = new Text(
-      "~b~Horn~w~ to stop engine",
-      new PointF(640f, 690f),
-      0.5f,
-      Color.FromArgb(255, 255, 255, 255),
-      Font.ChaletLondon,
-      Alignment.Center,
-      false,
-      true
-    );
-
-    public Text helpTextTurnOn = new Text(
-      "~b~Horn~w~ to start engine",
-      new PointF(640f, 690f),
-      0.5f,
-      Color.FromArgb(255, 255, 255, 255),
-      Font.ChaletLondon,
-      Alignment.Center,
-      false,
-      true
-    );
-
-    public Text helpTextJerryCan = new Text(
-      "Press ~b~Fire~w~ to refuel with jerry can",
-      new PointF(640f, 690f),
-      0.5f,
-      Color.FromArgb(255, 255, 255, 255),
-      Font.ChaletLondon,
-      Alignment.Center,
-      false,
-      true
-    );
-
     protected Tween<float> fuelBarColorTween = new FloatTween();
     protected bool fuelBarAnimationDir = true;
+    protected PointF basePosition = new PointF(0f, 584f);
 
     public PointF Position {
       set {
@@ -77,8 +37,6 @@ namespace FRFuel {
         fuelBar.Position = fuelBarBack.Position;
       }
     }
-
-    protected PointF basePosition = new PointF(0f, 584f);
 
     public HUD() {
       PointF fuelBarBackdropPosition = basePosition;
@@ -100,6 +58,20 @@ namespace FRFuel {
       fuelBar = new Rectangle(fuelBarPosition, fuelBarSize, fuelBarColourNormal);
     }
 
+    /// <summary>
+    /// Reloads scaleform movie to ensure that it will be rendered
+    /// Workaround for bug
+    /// Looks safe to span on every tick /shrug
+    /// </summary>
+    public void ReloadScaleformMovie() {
+      buttons = new Scaleform("instructional_buttons");
+    }
+
+    /// <summary>
+    /// Renders fuel bar
+    /// </summary>
+    /// <param name="currentFuelLevel"></param>
+    /// <param name="maxFuelLevel"></param>
     public void RenderBar(float currentFuelLevel, float maxFuelLevel) {
       float fuelLevelPercentage = (100f / maxFuelLevel) * currentFuelLevel;
       PointF safeZone = GetSafezoneBounds();
@@ -139,6 +111,10 @@ namespace FRFuel {
       fuelBar.Draw();
     }
 
+    /// <summary>
+    /// Returns user-configure screen safe zone offset
+    /// </summary>
+    /// <returns></returns>
     public static PointF GetSafezoneBounds() {
       float t = Function.Call<float>(Hash.GET_SAFE_ZONE_SIZE);
 
@@ -148,6 +124,10 @@ namespace FRFuel {
       );
     }
 
+    /// <summary>
+    /// Renders gas station marker
+    /// </summary>
+    /// <param name="pos"></param>
     public void RenderMarker(Vector3 pos) {
       World.DrawMarker(
           MarkerType.VerticalCylinder,
@@ -159,20 +139,52 @@ namespace FRFuel {
       );
     }
 
-    public static void DrawScaleform() {
-      var scaleform = new Scaleform("instructional_buttons");
-      scaleform.CallFunction("CLEAR_ALL");
-      scaleform.CallFunction("TOGGLE_MOUSE_BUTTONS", 0);
-      scaleform.CallFunction("CREATE_CONTAINER");
+    /// <summary>
+    /// Change instructions for engine cut off
+    /// </summary>
+    public void InstructTurnOffEngine() {
+      buttons.CallFunction("CLEAR_ALL");
+      buttons.CallFunction("TOGGLE_MOUSE_BUTTONS", 0);
+      buttons.CallFunction("CREATE_CONTAINER");
+      
+      buttons.CallFunction("SET_DATA_SLOT", 0, Function.Call<string>((Hash) 0x0499D7B09FC9B407, 2, (int) Control.VehicleHorn, 0), "Turn off engine");
 
-      scaleform.CallFunction("SET_DATA_SLOT", 0, Function.Call<string>((Hash) 0x0499D7B09FC9B407, 2, (int) Control.Jump, 0), "t1");
-      scaleform.CallFunction("SET_DATA_SLOT", 1, Function.Call<string>((Hash) 0x0499D7B09FC9B407, 2, (int) Control.FrontendCancel, 0), "t2");
-      scaleform.CallFunction("SET_DATA_SLOT", 2, Function.Call<string>((Hash) 0x0499D7B09FC9B407, 2, (int) Control.PhoneRight, 0), "");
-      scaleform.CallFunction("SET_DATA_SLOT", 3, Function.Call<string>((Hash) 0x0499D7B09FC9B407, 2, (int) Control.PhoneLeft, 0), "t3");
-      scaleform.CallFunction("SET_DATA_SLOT", 4, Function.Call<string>((Hash) 0x0499D7B09FC9B407, 2, (int) Control.FrontendRb, 0), "");
-      scaleform.CallFunction("SET_DATA_SLOT", 5, Function.Call<string>((Hash) 0x0499D7B09FC9B407, 2, (int) Control.FrontendLb, 0), "t4");
-      scaleform.CallFunction("DRAW_INSTRUCTIONAL_BUTTONS", -1);
-      scaleform.Render2D();
+      buttons.CallFunction("DRAW_INSTRUCTIONAL_BUTTONS", -1);
+    }
+
+    /// <summary>
+    /// Change instructions for refueling and engine spin up
+    /// </summary>
+    public void InstructRefuelOrTurnOnEngine() {
+      buttons.CallFunction("CLEAR_ALL");
+      buttons.CallFunction("TOGGLE_MOUSE_BUTTONS", 0);
+      buttons.CallFunction("CREATE_CONTAINER");
+
+      buttons.CallFunction("SET_DATA_SLOT", 0, Function.Call<string>((Hash) 0x0499D7B09FC9B407, 2, (int) Control.Jump, 0), "Refuel");
+      buttons.CallFunction("SET_DATA_SLOT", 1, Function.Call<string>((Hash) 0x0499D7B09FC9B407, 2, (int) Control.VehicleHorn, 0), "Turn on engine");
+
+      buttons.CallFunction("DRAW_INSTRUCTIONAL_BUTTONS", -1);
+    }
+
+    /// <summary>
+    /// Change instructions for manual refueling
+    /// </summary>
+    /// <param name="label"></param>
+    public void InstructManualRefuel(string label) {
+      buttons.CallFunction("CLEAR_ALL");
+      buttons.CallFunction("TOGGLE_MOUSE_BUTTONS", 0);
+      buttons.CallFunction("CREATE_CONTAINER");
+
+      buttons.CallFunction("SET_DATA_SLOT", 0, Function.Call<string>((Hash) 0x0499D7B09FC9B407, 2, (int) Control.Attack, 0), label);
+
+      buttons.CallFunction("DRAW_INSTRUCTIONAL_BUTTONS", -1);
+    }
+
+    /// <summary>
+    /// Renders instruction
+    /// </summary>
+    public void RenderInstructions() {
+      buttons.Render2D();
     }
   }
 }

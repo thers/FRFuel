@@ -3,9 +3,12 @@ using System.Threading.Tasks;
 using CitizenFX.Core;
 using CitizenFX.Core.Native;
 using CitizenFX.Core.UI;
+using System.Drawing;
 
 namespace FRFuel {
   public class FRFuel : BaseScript {
+
+    #region Fields
     public static string fuelLevelPropertyName = "_Fuel_Level";
     public static string manualRefuelAnimDict = "weapon@w_sp_jerrycan";
 
@@ -31,8 +34,10 @@ namespace FRFuel {
 
     protected Vehicle lastVehicle;
     protected bool currentVehicleFuelLevelInitialized = false;
+    protected bool hudActive = false;
 
     protected InLoopOutAnimation jerryCanAnimation;
+    #endregion
 
     public FRFuel() {
 #if DEBUG
@@ -62,6 +67,7 @@ namespace FRFuel {
       EntityDecoration.RegisterProperty(fuelLevelPropertyName, DecorationType.Float);
     }
 
+    #region Init
     /// <summary>
     /// Creates blips for gas stations
     /// </summary>
@@ -100,6 +106,7 @@ namespace FRFuel {
         pickups[i] = pickup;
       }
     }
+    #endregion
 
     /// <summary>
     /// Returns blip within given squared range
@@ -147,13 +154,9 @@ namespace FRFuel {
         }
 
         if (vehicle.IsEngineRunning) {
-          hud.helpTextTurnOff.Draw();
+          hud.InstructTurnOffEngine();
         } else {
-          if (fuelTankCapacity - fuel < 2f) {
-            hud.helpTextTurnOn.Draw();
-          } else {
-            hud.helpTextRefuel.Draw();
-          }
+          hud.InstructRefuelOrTurnOnEngine();
 
           if (Game.IsControlPressed(0, Control.Jump)) {
             if (fuel < fuelTankCapacity) {
@@ -161,6 +164,12 @@ namespace FRFuel {
             }
           }
         }
+
+        hud.RenderInstructions();
+        PlayHUDAppearSound();
+        hudActive = true;
+      } else {
+        hudActive = false;
       }
 
       VehicleSetFuelLevel(vehicle, fuel);
@@ -299,18 +308,16 @@ namespace FRFuel {
           vehicleHandle != 0 &&
           EntityDecoration.ExistOn(vehicle, fuelLevelPropertyName)
         ) {
-          hud.helpTextJerryCan.Draw();
-
           float max = VehicleMaxFuelLevel(vehicle);
           float current = VehicleFuelLevel(vehicle);
 
           if (max - current < 0.5f) {
-            hud.helpTextJerryCan.Caption = "Fuel tank is full";
+            hud.InstructManualRefuel("Fuel tank is full");
           } else {
-            hud.helpTextJerryCan.Caption = "Spill to refuel this car";
+            hud.InstructManualRefuel("Manual refueling");
           }
 
-          if (Game.IsControlPressed(0, Control.VehicleAttack)) {
+          if (Game.IsControlPressed(0, Control.Attack)) {
             jerryCanAnimation.Magick(playerPed);
 
             if (current < max) {
@@ -325,7 +332,20 @@ namespace FRFuel {
           if (Game.IsControlJustReleased(0, Control.VehicleAttack)) {
             jerryCanAnimation.RewindAndStop(playerPed);
           }
+
+          hud.RenderInstructions();
+          PlayHUDAppearSound();
+          hudActive = true;
+          return;
         }
+      }
+
+      hudActive = false;
+    }
+
+    protected void PlayHUDAppearSound() {
+      if (hudActive == false) {
+        Function.Call(Hash.PLAY_SOUND_FRONTEND, -1, "SELECT", "HUD_FRONTEND_MP_SOUNDSET");
       }
     }
 
@@ -334,10 +354,10 @@ namespace FRFuel {
     /// </summary>
     /// <returns></returns>
     public async Task OnTick() {
+      hud.ReloadScaleformMovie();
+
 #if DEBUG
       menu.OnTick();
-
-      //HUD.DrawScaleform();
 #endif
 
       Ped playerPed = Game.PlayerPed;
