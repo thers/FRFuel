@@ -168,6 +168,7 @@ namespace FRFuel {
           }
 
           if (Game.IsControlJustReleased(0, Control.Jump)) {
+            // Trigger onRefuelComplete Cient-Side Event. Return 1 argument with amount of fuel added to vehicle.
             TriggerEvent("onRefuelComplete", Math.Round(Convert.ToDouble(totalFuelAddedToVehicle)));
             totalFuelAddedToVehicle = 0f;      
           }
