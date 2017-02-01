@@ -345,7 +345,7 @@ namespace FRFuel {
 
     protected void PlayHUDAppearSound() {
       if (hudActive == false) {
-        Function.Call(Hash.PLAY_SOUND_FRONTEND, -1, "SELECT", "HUD_FRONTEND_MP_SOUNDSET");
+        Function.Call(Hash.PLAY_SOUND_FRONTEND, -1, "CONFIRM_BEEP", "HUD_MINI_GAME_SOUNDSET", 1);
       }
     }
 
