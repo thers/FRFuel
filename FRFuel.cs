@@ -30,7 +30,9 @@ namespace FRFuel {
 #endif
 
     public float showMarkerInRangeSquared = 2500f;
-    public Blip currentGasStation;
+    public Blip  currentGasStation;
+
+    public float totalFuelAddedToVehicle  = 0f;
 
     protected Vehicle lastVehicle;
     protected bool currentVehicleFuelLevelInitialized = false;
@@ -161,8 +163,15 @@ namespace FRFuel {
           if (Game.IsControlPressed(0, Control.Jump)) {
             if (fuel < fuelTankCapacity) {
               fuel += 0.1f;
+              totalFuelAddedToVehicle += 0.1f;
             }
           }
+
+          if (Game.IsControlJustReleased(0, Control.Jump)) {
+            TriggerEvent("onRefuelComplete", Math.Round(Convert.ToDouble(totalFuelAddedToVehicle)));
+            totalFuelAddedToVehicle = 0f;      
+          }
+
         }
 
         hud.RenderInstructions();
