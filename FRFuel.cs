@@ -21,22 +21,22 @@ namespace FRFuel {
     protected float fuelTractionImpact = 0.0001f;
     protected float fuelRPMImpact = 0.0005f;
 
-    protected Random random = new Random();
-
-    public HUD hud;
-
+    public float showMarkerInRangeSquared = 2500f;
+    
 #if DEBUG
     public Dev.DevMenu menu;
 #endif
 
-    public float showMarkerInRangeSquared = 2500f;
-    public Blip  currentGasStation;
+    public HUD hud;
+    public Random random = new Random();
 
-    public float totalFuelAddedToVehicle  = 0f;
-
+    protected Blip currentGasStation;
     protected Vehicle lastVehicle;
+
     protected bool currentVehicleFuelLevelInitialized = false;
     protected bool hudActive = false;
+    protected bool refuelAllowed = true;
+    protected float addedFuelCapacitor = 0f;
 
     protected InLoopOutAnimation jerryCanAnimation;
     #endregion
@@ -56,6 +56,12 @@ namespace FRFuel {
       EventHandlers["onClientMapStart"] += new Action<dynamic>((dynamic res) => {
         CreateBlips();
         CreateJerryCanPickUps();
+      });
+
+      EventHandlers["frfuel:refuelAllowed"] += new Action<dynamic>((dynamic toggle) => {
+        if (toggle.GetType() == typeof(bool)) {
+          refuelAllowed = (bool) toggle;
+        }
       });
 
       blips = new Blip[GasStations.positions.Length];
@@ -160,19 +166,20 @@ namespace FRFuel {
         } else {
           hud.InstructRefuelOrTurnOnEngine();
 
-          if (Game.IsControlPressed(0, Control.Jump)) {
-            if (fuel < fuelTankCapacity) {
-              fuel += 0.1f;
-              totalFuelAddedToVehicle += 0.1f;
+          if (refuelAllowed) {
+            if (Game.IsControlPressed(0, Control.Jump)) {
+              if (fuel < fuelTankCapacity) {
+                fuel += 0.1f;
+                addedFuelCapacitor += 0.1f;
+              }
+            }
+
+            if (Game.IsControlJustReleased(0, Control.Jump)) {
+              TriggerEvent("frfuel:fuelAdded", addedFuelCapacitor);
+              TriggerServerEvent("frfuel:fuelAdded", addedFuelCapacitor);
+              addedFuelCapacitor = 0f;
             }
           }
-
-          if (Game.IsControlJustReleased(0, Control.Jump)) {
-            // Trigger onRefuelComplete Cient-Side Event. Return 1 argument with amount of fuel added to vehicle.
-            TriggerEvent("onRefuelComplete", Math.Round(Convert.ToDouble(totalFuelAddedToVehicle)));
-            totalFuelAddedToVehicle = 0f;      
-          }
-
         }
 
         hud.RenderInstructions();
