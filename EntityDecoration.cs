@@ -12,15 +12,20 @@ namespace FRFuel
         Time = 5
     }
 
-    public class EntityDecoration
+    public static class EntityDecoration
     {
-        protected static Type floatType = typeof(float);
-        protected static Type boolType = typeof(bool);
-        protected static Type intType = typeof(int);
+        internal static Type floatType = typeof(float);
+        internal static Type boolType = typeof(bool);
+        internal static Type intType = typeof(int);
 
         public static bool ExistOn(Entity entity, string propertyName)
         {
             return Function.Call<bool>(Hash.DECOR_EXIST_ON, entity.NativeValue, propertyName);
+        }
+
+        public static bool HasDecor(this Entity ent, string propertyName)
+        {
+            return ExistOn(ent, propertyName);
         }
 
         public static void RegisterProperty(string propertyName, DecorationType type)
@@ -41,6 +46,21 @@ namespace FRFuel
         public static void Set(Entity entity, string propertyName, bool boolValue)
         {
             Function.Call(Hash.DECOR_SET_BOOL, entity.NativeValue, propertyName, boolValue);
+        }
+
+        public static void SetDecor(this Entity ent, string propertyName, float value)
+        {
+            Set(ent, propertyName, value);
+        }
+
+        public static void SetDecor(this Entity ent, string propertyName, int value)
+        {
+            Set(ent, propertyName, value);
+        }
+
+        public static void SetDecor(this Entity ent, string propertyName, bool value)
+        {
+            Set(ent, propertyName, value);
         }
 
         public static T Get<T>(Entity entity, string propertyName)
@@ -71,6 +91,11 @@ namespace FRFuel
             }
 
             return (T) Function.Call<T>(nativeMethod, entity.NativeValue, propertyName);
+        }
+
+        public static T GetDecor<T>(this Entity ent, string propertyName)
+        {
+            return Get<T>(ent, propertyName);
         }
     }
 

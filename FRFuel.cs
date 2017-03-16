@@ -286,16 +286,15 @@ namespace FRFuel
                 fuelTankCapacity = 65f;
             }
 
-            if (!EntityDecoration.ExistOn(vehicle, fuelLevelPropertyName))
+            if (!vehicle.HasDecor(fuelLevelPropertyName))
             {
-                EntityDecoration.Set(
-                  vehicle,
-                  fuelLevelPropertyName,
-                  RandomizeFuelLevel(fuelTankCapacity)
+                vehicle.SetDecor(
+                    fuelLevelPropertyName,
+                    RandomizeFuelLevel(fuelTankCapacity)
                 );
             }
 
-            vehicle.FuelLevel = EntityDecoration.Get<float>(vehicle, fuelLevelPropertyName);
+            vehicle.FuelLevel = vehicle.GetDecor<float>(fuelLevelPropertyName);
         }
 
         /// <summary>
@@ -326,7 +325,7 @@ namespace FRFuel
             }
 
             vehicle.FuelLevel = fuelLevel;
-            EntityDecoration.Set(vehicle, fuelLevelPropertyName, fuelLevel);
+            vehicle.SetDecor(fuelLevelPropertyName, fuelLevel);
         }
 
         /// <summary>
@@ -336,9 +335,9 @@ namespace FRFuel
         /// <returns></returns>
         public float VehicleFuelLevel(Vehicle vehicle)
         {
-            if (EntityDecoration.ExistOn(vehicle, fuelLevelPropertyName))
+            if (vehicle.HasDecor(fuelLevelPropertyName))
             {
-                return EntityDecoration.Get<float>(vehicle, fuelLevelPropertyName);
+                return vehicle.GetDecor<float>(fuelLevelPropertyName);
             }
             else
             {
@@ -378,7 +377,7 @@ namespace FRFuel
 
                 if (
                   vehicleHandle != 0 &&
-                  EntityDecoration.ExistOn(vehicle, fuelLevelPropertyName)
+                  vehicle.HasDecor(fuelLevelPropertyName)
                 )
                 {
                     float max = VehicleMaxFuelLevel(vehicle);
