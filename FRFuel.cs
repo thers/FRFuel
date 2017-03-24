@@ -73,8 +73,15 @@ namespace FRFuel
             blips = new Blip[GasStations.positions.Length];
             pickups = new Pickup[GasStations.positions.Length];
 
-            CreateBlips();
-            CreateJerryCanPickUps();
+            try
+            {
+                CreateBlips();
+                CreateJerryCanPickUps();
+            }
+            catch
+            {
+                // nothing
+            }
 
             Tick += OnTick;
 
