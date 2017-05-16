@@ -49,6 +49,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Config.cs" />
     <Compile Include="InLoopOutAnimation.cs" />
     <Compile Include="DevMenu.cs" />
     <Compile Include="EntityDecoration.cs" />

@@ -51,6 +51,8 @@ namespace FRFuel
 
         protected Vehicle LastVehicle { get => lastVehicle; set => lastVehicle = value; }
         protected Blip CurrentGasStation { get => currentGasStation; set => currentGasStation = value; }
+
+        protected Config Config { get; set; }
         #endregion
 
         /// <summary>
@@ -62,6 +64,8 @@ namespace FRFuel
             menu = new Dev.DevMenu();
 #endif
             hud = new HUD();
+
+            LoadConfig();
 
             jerryCanAnimation = new InLoopOutAnimation(
               new Animation(manualRefuelAnimDict, "fire_intro"),
@@ -103,10 +107,38 @@ namespace FRFuel
 
         #region Init
         /// <summary>
+        /// Loads configuration from file
+        /// </summary>
+        protected void LoadConfig()
+        {
+            string configContent = null;
+
+            try
+            {
+                configContent = Function.Call<string>(Hash.LOAD_RESOURCE_FILE, "frfuel", "config.ini");
+            }
+            catch(Exception e)
+            {
+                // nothing
+            }
+
+            Config = new Config(configContent);
+
+#if DEBUG
+            Debug.WriteLine($"CreatePickups: {Config.Get("CreatePickups", "true")}");
+#endif
+        }
+
+        /// <summary>
         /// Creates blips for gas stations
         /// </summary>
         public void CreateBlips()
         {
+            if (Config.Get("CreateBlips", "true") != "true")
+            {
+                return;
+            }
+
             for (int i = 0; i < GasStations.positions.Length; i++)
             {
                 var blip = World.CreateBlip(GasStations.positions[i]);
@@ -125,6 +157,11 @@ namespace FRFuel
         /// </summary>
         public void CreateJerryCanPickUps()
         {
+            if (Config.Get("CreatePickups", "true") != "true")
+            {
+                return;
+            }
+
             int model = 883325847;
 
             Function.Call(Hash.REQUEST_MODEL, model);
