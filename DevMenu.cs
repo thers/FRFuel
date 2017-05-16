@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using CitizenFX.Core;
 using CitizenFX.Core.UI;
 using NativeUI;
 using System.Drawing;
-using System.Security;
 using CitizenFX.Core.Native;
 
 namespace FRFuel.Dev
@@ -18,6 +13,7 @@ namespace FRFuel.Dev
         protected UIMenu mainMenu;
 
         protected UIMenuItem position;
+        protected UIMenuItem teleport;
         protected UIMenuItem deleteVehicle;
 
         protected UIMenuItem vehicleModelId;
@@ -29,14 +25,25 @@ namespace FRFuel.Dev
         protected UIMenuItem decoration;
 
         protected Text txt = new Text("", new PointF(600f, 100f), .5f);
+        protected int gasStation = 0;
 
         public DevMenu()
         {
+            var stations = new List<dynamic> { };
+
+            for (int i = 0; i < GasStations.positions.Length; i++)
+            {
+                stations.Add(i);
+            }
+
             menuPool = new MenuPool();
             mainMenu = new UIMenu("FRFuel dev menu", "things");
 
             position = new UIMenuItem("Pos");
-            position.Enabled = false;
+            position.Enabled = true;
+
+            teleport = new UIMenuListItem("Gas stations", stations, 0);
+            teleport.Enabled = true;
 
             deleteVehicle = new UIMenuItem("Delete last vehicle");
 
@@ -49,6 +56,7 @@ namespace FRFuel.Dev
             vehicleFuelTank = new UIMenuItem("Vehicle fuel tank");
 
             mainMenu.AddItem(position);
+            mainMenu.AddItem(teleport);
             mainMenu.AddItem(deleteVehicle);
             mainMenu.AddItem(knownVehicle);
             mainMenu.AddItem(vehicleModelId);
@@ -56,6 +64,17 @@ namespace FRFuel.Dev
 
             mainMenu.OnItemSelect += (sende, item, index) =>
             {
+                if (item == position)
+                {
+                    var p = Game.PlayerPed.Position;
+
+                    BaseScript.TriggerServerEvent(
+                      "frfuel:dev:saveFuel",
+                      $"new Vector3({p.X.ToString().Replace(",", ".")}f,\t{p.Y.ToString().Replace(",", ".")}f,\t{p.Z.ToString().Replace(",", ".")}f),"
+                    );
+                    Screen.ShowNotification("Position saved");
+                }
+
                 if (item == vehicleFuelTank && Game.PlayerPed.IsInVehicle())
                 {
                     BaseScript.TriggerServerEvent(
@@ -72,6 +91,19 @@ namespace FRFuel.Dev
                         Function.Call(Hash.SET_ENTITY_AS_MISSION_ENTITY, Game.PlayerPed.LastVehicle, false, false);
                         Game.PlayerPed.LastVehicle.Delete();
                     }
+                }
+
+                if (item == teleport)
+                {
+                    Game.PlayerPed.Position = GasStations.positions[gasStation];
+                }
+            };
+
+            mainMenu.OnListChange += (sender, item, index) =>
+            {
+                if (item == teleport)
+                {
+                    gasStation = index;
                 }
             };
 

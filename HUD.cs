@@ -21,12 +21,6 @@ namespace FRFuel
         protected Rectangle fuelBarBack;
         protected Rectangle fuelBar;
 
-        public Vector3 markerPutDown = new Vector3(0f, 0f, 3f);
-        public Vector3 markerDir = new Vector3();
-        public Vector3 markerRot = new Vector3();
-        public Vector3 markerScale = new Vector3(15f);
-        public Color markerColour = Color.FromArgb(50, 255, 179, 0);
-
         protected Tween<float> fuelBarColorTween = new FloatTween();
         protected bool fuelBarAnimationDir = true;
         protected PointF basePosition = new PointF(0f, 584f);
@@ -133,22 +127,6 @@ namespace FRFuel
             return new PointF(
               (int) Math.Round((1280 - (1280 * t)) / 2),
               (int) Math.Round((720 - (720 * t)) / 2)
-            );
-        }
-
-        /// <summary>
-        /// Renders gas station marker
-        /// </summary>
-        /// <param name="pos"></param>
-        public void RenderMarker(Vector3 pos)
-        {
-            World.DrawMarker(
-                MarkerType.VerticalCylinder,
-                pos - markerPutDown,
-                markerDir,
-                markerRot,
-                markerScale,
-                markerColour
             );
         }
 

@@ -2,8 +2,6 @@
 using System.Threading.Tasks;
 using CitizenFX.Core;
 using CitizenFX.Core.Native;
-using CitizenFX.Core.UI;
-using System.Drawing;
 
 namespace FRFuel
 {
@@ -14,6 +12,14 @@ namespace FRFuel
         public static string fuelLevelPropertyName = "_Fuel_Level";
         public static string manualRefuelAnimDict = "weapon@w_sp_jerrycan";
 
+        public static string[] tankBones = new string[] {
+            "petrolcap",
+            "petroltank",
+            "petroltank_r",
+            "petroltank_l",
+            "wheel_lr"
+        };
+
         protected Blip[] blips;
         protected Pickup[] pickups;
 
@@ -23,7 +29,7 @@ namespace FRFuel
         protected float fuelTractionImpact = 0.0001f;
         protected float fuelRPMImpact = 0.0005f;
 
-        public float showMarkerInRangeSquared = 2500f;
+        public float showMarkerInRangeSquared = 250f;
 
 #if DEBUG
     public Dev.DevMenu menu;
@@ -32,8 +38,9 @@ namespace FRFuel
         public HUD hud;
         public Random random = new Random();
 
-        protected Blip currentGasStation;
-        protected Vehicle lastVehicle;
+        private int currentGasStationIndex;
+        private Blip currentGasStation;
+        private Vehicle lastVehicle;
 
         protected bool currentVehicleFuelLevelInitialized = false;
         protected bool hudActive = false;
@@ -41,8 +48,14 @@ namespace FRFuel
         protected float addedFuelCapacitor = 0f;
 
         protected InLoopOutAnimation jerryCanAnimation;
+
+        protected Vehicle LastVehicle { get => lastVehicle; set => lastVehicle = value; }
+        protected Blip CurrentGasStation { get => currentGasStation; set => currentGasStation = value; }
         #endregion
 
+        /// <summary>
+        /// Ctor
+        /// </summary>
         public FRFuel()
         {
 #if DEBUG
@@ -134,24 +147,78 @@ namespace FRFuel
         #endregion
 
         /// <summary>
-        /// Returns blip within given squared range
+        /// Returns gas station position that is in range
         /// </summary>
         /// <param name="pos"></param>
         /// <param name="rangeSquared"></param>
         /// <returns></returns>
-        public Blip GetBlipInRange(Vector3 pos, float rangeSquared)
+        public int GetGasStationIndexInRange(Vector3 pos, float rangeSquared)
         {
             for (int i = 0; i < blips.Length; i++)
             {
                 Blip blip = blips[i];
 
-                if (Vector3.DistanceSquared(blip.Position, pos) < rangeSquared)
+                if (Vector3.DistanceSquared(GasStations.positions[i], pos) < rangeSquared)
                 {
-                    return blip;
+                    return i;
                 }
             }
 
-            return null;
+            return -1;
+        }
+
+        /// <summary>
+        /// Returns "adequate" vehicle's petrol tank position
+        /// </summary>
+        /// <param name="vehicle"></param>
+        /// <returns></returns>
+        public Vector3 GetVehicleTankPos(Vehicle vehicle)
+        {
+            EntityBone bone = null;
+
+            foreach(var boneName in tankBones)
+            {
+                var boneIndex = Function.Call<int>(
+                    Hash.GET_ENTITY_BONE_INDEX_BY_NAME,
+                    vehicle,
+                    boneName
+                );
+
+                bone = vehicle.Bones[boneIndex];
+
+                if (bone.IsValid)
+                {
+                    break;
+                }
+            }
+
+            if (bone == null)
+            {
+                return vehicle.Position;
+            }
+
+            return bone.Position;
+        }
+
+        /// <summary>
+        /// Checks if vehicle is within range of activation
+        /// for any pump at current gas station
+        /// </summary>
+        /// <param name="vehicle"></param>
+        /// <returns></returns>
+        public bool IsVehicleNearAnyPump(Vehicle vehicle)
+        {
+            var fuelTankPos = GetVehicleTankPos(vehicle);
+
+            foreach (var pump in GasStations.pumps[currentGasStationIndex])
+            {
+                if (Vector3.DistanceSquared(pump, fuelTankPos) <= 20f)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -177,7 +244,7 @@ namespace FRFuel
               // If we have gas station near us
               currentGasStation != null &&
               // And ped is in range of sqrt(80) to it
-              Vector3.DistanceSquared(currentGasStation.Position, vehicle.Position) <= 80f
+              IsVehicleNearAnyPump(vehicle)
             )
             {
                 if (vehicle.Speed < 0.1f)
@@ -254,16 +321,17 @@ namespace FRFuel
         {
             hud.RenderBar(playerPed.CurrentVehicle.FuelLevel, fuelTankCapacity);
 
-            Blip blipInRange = GetBlipInRange(playerPed.Position, showMarkerInRangeSquared);
+            var gasStationIndex = GetGasStationIndexInRange(playerPed.Position, showMarkerInRangeSquared);
 
-            if (blipInRange != null)
+            if (gasStationIndex != -1)
             {
-                hud.RenderMarker(blipInRange.Position);
+                var blipInRange = blips[gasStationIndex];
 
                 if (blipInRange != currentGasStation)
                 {
                     // Found blip in range
                     currentGasStation = blipInRange;
+                    currentGasStationIndex = gasStationIndex;
                 }
             }
             else
@@ -272,6 +340,7 @@ namespace FRFuel
                 {
                     // Lost blip in range
                     currentGasStation = null;
+                    currentGasStationIndex = -1;
                 }
             }
         }
