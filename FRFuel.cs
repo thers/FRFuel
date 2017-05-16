@@ -39,7 +39,6 @@ namespace FRFuel
         public Random random = new Random();
 
         private int currentGasStationIndex;
-        private Blip currentGasStation;
         private Vehicle lastVehicle;
 
         protected bool currentVehicleFuelLevelInitialized = false;
@@ -50,7 +49,6 @@ namespace FRFuel
         protected InLoopOutAnimation jerryCanAnimation;
 
         protected Vehicle LastVehicle { get => lastVehicle; set => lastVehicle = value; }
-        protected Blip CurrentGasStation { get => currentGasStation; set => currentGasStation = value; }
 
         protected Config Config { get; set; }
         #endregion
@@ -279,7 +277,7 @@ namespace FRFuel
             // Refueling at gas station
             if (
               // If we have gas station near us
-              currentGasStation != null &&
+              currentGasStationIndex != -1 &&
               // And ped is in range of sqrt(80) to it
               IsVehicleNearAnyPump(vehicle)
             )
@@ -362,21 +360,17 @@ namespace FRFuel
 
             if (gasStationIndex != -1)
             {
-                var blipInRange = blips[gasStationIndex];
-
-                if (blipInRange != currentGasStation)
+                if (gasStationIndex != currentGasStationIndex)
                 {
-                    // Found blip in range
-                    currentGasStation = blipInRange;
+                    // Found gas station in range
                     currentGasStationIndex = gasStationIndex;
                 }
             }
             else
             {
-                if (currentGasStation != null)
+                if (currentGasStationIndex != -1)
                 {
-                    // Lost blip in range
-                    currentGasStation = null;
+                    // Lost gas station in range
                     currentGasStationIndex = -1;
                 }
             }
