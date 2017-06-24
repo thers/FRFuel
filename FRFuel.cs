@@ -343,6 +343,8 @@ namespace FRFuel
                 else
                 {
                     vehicle.IsDriveable = true;
+                    // FIXME: No neat default behaviour in 1103 :c
+                    vehicle.IsEngineRunning = true;
                 }
             }
         }
