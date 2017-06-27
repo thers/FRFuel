@@ -18,6 +18,7 @@ namespace FRFuel.Dev
 
         protected UIMenuItem vehicleModelId;
         protected UIMenuItem vehicleFuelTank;
+        protected UIMenuItem drainFuelTank;
         protected UIMenuItem knownVehicle;
 
         protected UIMenuItem netVehicleId;
@@ -54,6 +55,7 @@ namespace FRFuel.Dev
             knownVehicle.Enabled = false;
 
             vehicleFuelTank = new UIMenuItem("Vehicle fuel tank");
+            drainFuelTank = new UIMenuItem("Almost drain fuel tank");
 
             mainMenu.AddItem(position);
             mainMenu.AddItem(teleport);
@@ -61,6 +63,7 @@ namespace FRFuel.Dev
             mainMenu.AddItem(knownVehicle);
             mainMenu.AddItem(vehicleModelId);
             mainMenu.AddItem(vehicleFuelTank);
+            mainMenu.AddItem(drainFuelTank);
 
             mainMenu.OnItemSelect += (sende, item, index) =>
             {
@@ -82,6 +85,11 @@ namespace FRFuel.Dev
                       "{" + Game.PlayerPed.CurrentVehicle.Model.Hash.ToString() + ", " + Game.PlayerPed.CurrentVehicle.FuelLevel.ToString() + "f},"
                     );
                     Screen.ShowNotification("Fuel to model saved");
+                }
+
+                if (item == drainFuelTank && Game.PlayerPed.IsInVehicle())
+                {
+                    Game.PlayerPed.CurrentVehicle.SetDecor(FRFuel.fuelLevelPropertyName, .5f);
                 }
 
                 if (item == deleteVehicle)

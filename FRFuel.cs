@@ -272,17 +272,25 @@ namespace FRFuel
                 fuel -= normalizedRPMValue * fuelRPMImpact;
                 fuel -= vehicle.Acceleration * fuelAccelerationImpact;
                 fuel -= vehicle.MaxTraction * fuelTractionImpact;
+
+                fuel = fuel < 0f ? 0f : fuel;
+            }
+
+            // FIXME: Temp engine cut-off
+            if (fuel == 0f && vehicle.IsEngineRunning)
+            {
+                vehicle.IsEngineRunning = false;
             }
 
             // Refueling at gas station
             if (
               // If we have gas station near us
               currentGasStationIndex != -1 &&
-              // And ped is in range of sqrt(80) to it
+              // And near any pump
               IsVehicleNearAnyPump(vehicle)
             )
             {
-                if (vehicle.Speed < 0.1f)
+                if (vehicle.Speed < 0.1f && fuel != 0) // Temp check for out of fuel as we're cutting engine off before
                 {
                     ControlEngine(vehicle);
                 }
@@ -306,7 +314,7 @@ namespace FRFuel
                             }
                         }
 
-                        if (Game.IsControlJustReleased(0, Control.Jump))
+                        if (Game.IsControlJustReleased(0, Control.Jump) && addedFuelCapacitor > 0f)
                         {
                             TriggerEvent("frfuel:fuelAdded", addedFuelCapacitor);
                             TriggerServerEvent("frfuel:fuelAdded", addedFuelCapacitor);
@@ -321,6 +329,12 @@ namespace FRFuel
             }
             else
             {
+                // FIXME: Temp engine cut-off
+                if (fuel != 0f && !vehicle.IsEngineRunning)
+                {
+                    vehicle.IsEngineRunning = true;
+                }
+
                 hudActive = false;
             }
 
@@ -581,7 +595,6 @@ namespace FRFuel
 
                 ConsumeFuel(vehicle);
                 RenderUI(playerPed);
-
             }
             else
             {
