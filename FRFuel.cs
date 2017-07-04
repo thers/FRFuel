@@ -1,4 +1,6 @@
-﻿using System;
+﻿#undef MANUAL_ENGINE_CUTOFF
+
+using System;
 using System.Threading.Tasks;
 using CitizenFX.Core;
 using CitizenFX.Core.Native;
@@ -31,9 +33,9 @@ namespace FRFuel
 
         public float showMarkerInRangeSquared = 250f;
 
-#if DEBUG
-    public Dev.DevMenu menu;
-#endif
+        #if DEBUG
+        public Dev.DevMenu menu;
+        #endif
 
         public HUD hud;
         public Random random = new Random();
@@ -58,9 +60,9 @@ namespace FRFuel
         /// </summary>
         public FRFuel()
         {
-#if DEBUG
+            #if DEBUG
             menu = new Dev.DevMenu();
-#endif
+            #endif
             hud = new HUD();
 
             LoadConfig();
@@ -122,9 +124,9 @@ namespace FRFuel
 
             Config = new Config(configContent);
 
-#if DEBUG
+            #if DEBUG
             Debug.WriteLine($"CreatePickups: {Config.Get("CreatePickups", "true")}");
-#endif
+            #endif
         }
 
         /// <summary>
@@ -276,11 +278,12 @@ namespace FRFuel
                 fuel = fuel < 0f ? 0f : fuel;
             }
 
-            // FIXME: Temp engine cut-off
+#if MANUAL_ENGINE_CUTOFF
             if (fuel == 0f && vehicle.IsEngineRunning)
             {
                 vehicle.IsEngineRunning = false;
             }
+#endif
 
             // Refueling at gas station
             if (
@@ -290,7 +293,10 @@ namespace FRFuel
               IsVehicleNearAnyPump(vehicle)
             )
             {
-                if (vehicle.Speed < 0.1f && fuel != 0) // Temp check for out of fuel as we're cutting engine off before
+#if MANUAL_ENGINE_CUTOFF
+                if (vehicle.Speed < 0.1f && fuel != 0)
+#endif
+                if (vehicle.Speed < 0.1f)
                 {
                     ControlEngine(vehicle);
                 }
@@ -329,11 +335,12 @@ namespace FRFuel
             }
             else
             {
-                // FIXME: Temp engine cut-off
+#if MANUAL_ENGINE_CUTOFF
                 if (fuel != 0f && !vehicle.IsEngineRunning)
                 {
                     vehicle.IsEngineRunning = true;
                 }
+#endif
 
                 hudActive = false;
             }
