@@ -407,14 +407,7 @@ namespace FRFuel
         {
             currentVehicleFuelLevelInitialized = true;
 
-            if (VehiclesPetrolTanks.Has(vehicle))
-            {
-                fuelTankCapacity = VehiclesPetrolTanks.Get(vehicle);
-            }
-            else
-            {
-                fuelTankCapacity = 65f;
-            }
+            fuelTankCapacity = VehicleMaxFuelLevel(vehicle);
 
             if (!vehicle.HasDecor(fuelLevelPropertyName))
             {
@@ -482,14 +475,12 @@ namespace FRFuel
         /// <returns></returns>
         public float VehicleMaxFuelLevel(Vehicle vehicle)
         {
-            if (VehiclesPetrolTanks.Has(vehicle))
-            {
-                return VehiclesPetrolTanks.Get(vehicle);
-            }
-            else
-            {
-                return 65f;
-            }
+            return Function.Call<float>(
+                (Hash)0x642FC12F,
+                vehicle,
+                "CHandlingData",
+                "fPetrolTankVolume"
+            );
         }
 
         /// <summary>

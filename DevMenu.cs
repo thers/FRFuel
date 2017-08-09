@@ -19,7 +19,6 @@ namespace FRFuel.Dev
         protected UIMenuItem vehicleModelId;
         protected UIMenuItem vehicleFuelTank;
         protected UIMenuItem drainFuelTank;
-        protected UIMenuItem knownVehicle;
 
         protected UIMenuItem netVehicleId;
         protected UIMenuItem netVehicleIdControl;
@@ -51,16 +50,12 @@ namespace FRFuel.Dev
             vehicleModelId = new UIMenuItem("Vehicle model ID");
             vehicleModelId.Enabled = false;
 
-            knownVehicle = new UIMenuItem("Is known vehicle");
-            knownVehicle.Enabled = false;
-
             vehicleFuelTank = new UIMenuItem("Vehicle fuel tank");
             drainFuelTank = new UIMenuItem("Almost drain fuel tank");
 
             mainMenu.AddItem(position);
             mainMenu.AddItem(teleport);
             mainMenu.AddItem(deleteVehicle);
-            mainMenu.AddItem(knownVehicle);
             mainMenu.AddItem(vehicleModelId);
             mainMenu.AddItem(vehicleFuelTank);
             mainMenu.AddItem(drainFuelTank);
@@ -126,8 +121,7 @@ namespace FRFuel.Dev
             if (Game.PlayerPed.IsInVehicle())
             {
                 Vehicle vehicle = Game.PlayerPed.CurrentVehicle;
-
-                knownVehicle.SetRightLabel(VehiclesPetrolTanks.dict.ContainsKey(vehicle.Model.Hash) ? "Yes" : "No");
+                
                 vehicleModelId.SetRightLabel(vehicle.DisplayName.ToString());
                 vehicleFuelTank.SetRightLabel(vehicle.FuelLevel.ToString());
             }
