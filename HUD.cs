@@ -11,7 +11,7 @@ namespace FRFuel
     {
         protected Scaleform buttons = new Scaleform("instructional_buttons");
 
-        protected float fuelBarWidth = 180f;
+        protected float fuelBarWidth = GetBarWidth();
         protected float fuelBarHeight = 6f;
 
         protected Color fuelBarColourNormal;
@@ -123,10 +123,12 @@ namespace FRFuel
         public static PointF GetSafezoneBounds()
         {
             float t = Function.Call<float>(Hash.GET_SAFE_ZONE_SIZE);
+            float w = Screen.Width;
+            float h = Screen.Height;
 
             return new PointF(
-              (int) Math.Round((1280 - (1280 * t)) / 2),
-              (int) Math.Round((720 - (720 * t)) / 2)
+              (int) Math.Round((w - (w * t)) / 2 + 1),
+              (int) Math.Round((h - (h * t)) / 2 - 2)
             );
         }
 
@@ -142,6 +144,39 @@ namespace FRFuel
             buttons.CallFunction("SET_DATA_SLOT", 0, Function.Call<string>((Hash) 0x0499D7B09FC9B407, 2, (int) Control.VehicleHorn, 0), "Turn off engine");
 
             buttons.CallFunction("DRAW_INSTRUCTIONAL_BUTTONS", -1);
+        }
+
+        /// <summary>
+        /// Returns resolution specified bar width
+        /// </summary>
+        /// <returns></returns>
+        public static float GetBarWidth()
+        {
+            float width;
+            double aspect = Screen.AspectRatio;
+
+            switch (aspect)
+            {
+                case (float)1.5: // 3:2
+                    width = 212f;
+                    break;
+                case (float)1.33333337306976: // 4:3
+                    width = 240f;
+                    break;
+                case (float)1.66666662693024: // 5:3
+                    width = 191f;
+                    break;
+                case (float)1.25: // 5:4
+                    width = 255f;
+                    break;
+                case (float)1.60000002384186: // 16:10
+                    width = 200f;
+                    break;
+                default:
+                    width = 180f; // 16:9
+                    break;
+            }
+            return width;
         }
 
         /// <summary>
