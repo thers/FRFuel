@@ -127,8 +127,8 @@ namespace FRFuel
             float h = Screen.Height;
 
             return new PointF(
-              (int)Math.Round((w - (w * t)) / 2 + 1),
-              (int)Math.Round((h - (h * t)) / 2 - 2)
+              (int) Math.Round((w - (w * t)) / 2 + 1),
+              (int) Math.Round((h - (h * t)) / 2 - 2)
             );
         }
 
@@ -164,7 +164,7 @@ namespace FRFuel
                     width = 240f;
                     break;
                 case (float)1.66666662693024: // 5:3
-                    width = 191;
+                    width = 191f;
                     break;
                 case (float)1.25: // 5:4
                     width = 255f;
