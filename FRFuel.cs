@@ -354,7 +354,7 @@ namespace FRFuel
         /// <param name="vehicle"></param>
         public void ControlEngine(Vehicle vehicle)
         {
-            if (Game.IsControlJustReleased(0, Control.VehicleHorn))
+            if (Game.IsControlJustReleased(0, Control.VehicleHorn) && !Game.IsControlPressed(0, Control.Jump))
             {
                 if (vehicle.IsEngineRunning)
                 {
