@@ -53,6 +53,7 @@ namespace FRFuel
         protected Vehicle LastVehicle { get => lastVehicle; set => lastVehicle = value; }
 
         protected Config Config { get; set; }
+        protected bool showHud = true;
         #endregion
 
         /// <summary>
@@ -124,8 +125,11 @@ namespace FRFuel
 
             Config = new Config(configContent);
 
+            showHud = Config.Get("ShowHud", "true") == "true";
+
             #if DEBUG
             Debug.WriteLine($"CreatePickups: {Config.Get("CreatePickups", "true")}");
+            Debug.WriteLine($"ShowHud: {Config.Get("ShowHud", "true")}");
             #endif
         }
 
@@ -377,7 +381,10 @@ namespace FRFuel
         /// <param name="playerPed"></param>
         public void RenderUI(Ped playerPed)
         {
-            hud.RenderBar(playerPed.CurrentVehicle.FuelLevel, fuelTankCapacity);
+            if (showHud)
+            {
+                hud.RenderBar(playerPed.CurrentVehicle.FuelLevel, fuelTankCapacity);
+            }
 
             var gasStationIndex = GetGasStationIndexInRange(playerPed.Position, showMarkerInRangeSquared);
 
