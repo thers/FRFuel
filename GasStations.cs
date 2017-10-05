@@ -31,8 +31,9 @@ namespace FRFuel
             new Vector3(2581.321f,   362.0393f,  108.4688f),
             new Vector3(1785.363f,   3330.372f,  41.38188f),
             new Vector3(-319.690f,   -1471.610f,  30.030f), /* Innocence Blvd / Alta St [SR-19] */
-            new Vector3(174.880f,    -1562.450f,  28.740f) /* Davis Ave / Macdonald St */
-            new Vector3(1246.480f, -1485.450f,  34.900f) /* Near El Rancho Blvd [SR-18] / Capital Blvd */
+            new Vector3(174.880f,    -1562.450f,  28.740f), /* Davis Ave / Macdonald St */
+            new Vector3(1246.480f, -1485.450f,  34.900f), /* Near El Rancho Blvd [SR-18] / Capital Blvd */
+            new Vector3(-66.330f, -2532.570f,  6.140f) /* Near Miriam Turner Overpass */
         };
 
         public static Vector3[][] pumps =
@@ -270,6 +271,12 @@ namespace FRFuel
             {
                 new Vector3(1246.160f,  -1488.150f,  34.900f),
                 new Vector3(1246.480f,  -1482.760f,  34.900f),
+            },
+            // 28
+            new Vector3[]
+            {
+                new Vector3(-64.250f, -2533.900f,  6.140f),
+                new Vector3(-68.720f, -2530.710f,  6.140f),
             }
         };
     }
