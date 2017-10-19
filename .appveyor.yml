@@ -1,16 +1,20 @@
 image: Visual Studio 2017
 
 install:
-  - ps: $Env:frfuel_version = Get-Content version.txt -Raw
+  - ps: $Env:FRFUEL_VERSION = Get-Content version.txt -Raw
 
 artifacts:
-  - path: frfuel_$(frfuel_version).zip
+  - path: frfuel_%FRFUEL_VERSION%.zip
     name: frfuel
 
+configuration: Release
 platform: Any CPU
+
+before_build:
+- nuget restore
 
 build:
   project: FRFuel.csproj
 
 after_build:
-- 7z a frfuel_$(frfuel_version).zip %APPVEYOR_BUILD_FOLDER%\bin\Release\frfuel.net.dll
+- 7z a frfuel_%FRFUEL_VERSION%.zip %APPVEYOR_BUILD_FOLDER%\bin\Release\frfuel.net.dll
