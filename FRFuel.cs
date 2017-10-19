@@ -33,10 +33,6 @@ namespace FRFuel
 
         public float showMarkerInRangeSquared = 250f;
 
-        #if DEBUG
-        public Dev.DevMenu menu;
-        #endif
-
         public HUD hud;
         public Random random = new Random();
 
@@ -61,9 +57,6 @@ namespace FRFuel
         /// </summary>
         public FRFuel()
         {
-            #if DEBUG
-            menu = new Dev.DevMenu();
-            #endif
             hud = new HUD();
 
             LoadConfig();
@@ -567,10 +560,6 @@ namespace FRFuel
         public async Task OnTick()
         {
             hud.ReloadScaleformMovie();
-
-#if DEBUG
-      menu.OnTick();
-#endif
 
             Ped playerPed = Game.PlayerPed;
 

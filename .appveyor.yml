@@ -1,0 +1,16 @@
+image: Visual Studio 2017
+
+install:
+  -ps: $Env:frfuel_version = Get-Content version.txt -Raw
+
+artifacts:
+  -path: frfuel_$(frfuel_version).zip
+   name: frfuel
+
+platform: Any CPU
+
+build:
+  project: FRFuel.csproj
+
+after_build:
+- 7z a frfuel_$(frfuel_version).zip %APPVEYOR_BUILD_FOLDER%\bin\Release\frfuel.net.dll
