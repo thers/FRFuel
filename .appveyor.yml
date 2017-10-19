@@ -4,7 +4,7 @@ install:
   - ps: $Env:FRFUEL_VERSION = Get-Content version.txt -Raw
 
 artifacts:
-  - path: frfuel_%FRFUEL_VERSION%.zip
+  - path: frfuel_$(FRFUEL_VERSION).zip
     name: frfuel
 
 configuration: Release
