@@ -14,7 +14,7 @@ before_build:
 - nuget restore
 
 build:
-  project: FRFuel.csproj
+  project: FRFuel.sln
 
 after_build:
 - 7z a frfuel_%FRFUEL_VERSION%.zip %APPVEYOR_BUILD_FOLDER%\bin\Release\frfuel.net.dll

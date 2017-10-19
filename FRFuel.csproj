@@ -34,7 +34,6 @@
   <ItemGroup>
     <Reference Include="CitizenFX.Core, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>packages\CitizenFX.Core.1.2.0\lib\net45\CitizenFX.Core.dll</HintPath>
-      <HintPath>..\packages\CitizenFX.Core.1.2.0\lib\net45\CitizenFX.Core.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -58,9 +57,7 @@
   <ItemGroup>
     <None Include=".gitignore" />
     <None Include="LICENSE.md" />
-    <None Include="packages.config">
-      <SubType>Designer</SubType>
-    </None>
+    <None Include="packages.config" />
     <None Include="README.md" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
