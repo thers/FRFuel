@@ -50,6 +50,8 @@ namespace FRFuel
 
         protected Config Config { get; set; }
         protected bool showHud = true;
+
+        protected bool initialized = false;
         #endregion
 
         /// <summary>
@@ -59,19 +61,11 @@ namespace FRFuel
         {
             hud = new HUD();
 
-            LoadConfig();
-
             jerryCanAnimation = new InLoopOutAnimation(
               new Animation(manualRefuelAnimDict, "fire_intro"),
               new Animation(manualRefuelAnimDict, "fire"),
               new Animation(manualRefuelAnimDict, "fire_outro")
             );
-
-            EventHandlers["onClientMapStart"] += new Action<dynamic>((dynamic res) =>
-            {
-                CreateBlips();
-                CreateJerryCanPickUps();
-            });
 
             EventHandlers["frfuel:refuelAllowed"] += new Action<dynamic>((dynamic toggle) =>
             {
@@ -83,16 +77,6 @@ namespace FRFuel
 
             blips = new Blip[GasStations.positions.Length];
             pickups = new Pickup[GasStations.positions.Length];
-
-            try
-            {
-                CreateBlips();
-                CreateJerryCanPickUps();
-            }
-            catch
-            {
-                // nothing
-            }
 
             Tick += OnTick;
 
@@ -559,6 +543,16 @@ namespace FRFuel
         /// <returns></returns>
         public async Task OnTick()
         {
+            if (!initialized)
+            {
+                initialized = true;
+
+                LoadConfig();
+
+                CreateBlips();
+                CreateJerryCanPickUps();
+            }
+
             hud.ReloadScaleformMovie();
 
             Ped playerPed = Game.PlayerPed;
