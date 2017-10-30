@@ -1,5 +1,7 @@
 # FRFuel
 
+[![Build status](https://ci.appveyor.com/api/projects/status/vupxr6p40fgncl4w?svg=true)](https://ci.appveyor.com/project/thers)
+
 ## Features
 
 - Fuel level sync between players vehicles
@@ -11,6 +13,6 @@
 
 ## Installation
 
-Download `zip` archive from [latest release](https://github.com/RiderSx/FRFuel/releases) and unzip it to your resources folder.
-Add it to the `AutoStartResources` of your `citmp-server.yml`.
+Download `zip` archive from [latest artifacts](https://ci.appveyor.com/project/thers/frfuel/build/artifacts) and unzip it to your resources folder.
+Set to autostart in your config file `start frfuel`.
 You're all set. Have fun.
