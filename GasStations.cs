@@ -33,7 +33,96 @@ namespace FRFuel
             new Vector3(-319.690f,   -1471.610f,  30.030f), /* Innocence Blvd / Alta St [SR-19] */
             new Vector3(174.880f,    -1562.450f,  28.740f), /* Davis Ave / Macdonald St */
             new Vector3(1246.480f, -1485.450f,  34.900f), /* Near El Rancho Blvd [SR-18] / Capital Blvd */
-            new Vector3(-66.330f, -2532.570f,  6.140f) /* Near Miriam Turner Overpass */
+            new Vector3(-66.330f, -2532.570f,  6.140f), /* Near Miriam Turner Overpass */
+        };
+
+        public static Vector3[] AircraftPos =
+        {
+            new Vector3(1771.79f, 3239.86f,  42.27f),
+            new Vector3(-1145.84f, -2864.67f,  13.95f),
+            new Vector3(-1178.64f, -2846.0f,  13.95f),
+            new Vector3(-1112.27f, -2883.7f,  13.95f),
+            new Vector3(-982.41f, -3005.01f,  13.95f),
+            new Vector3(-982.41f, -3005.01f,  13.95f),
+            new Vector3(2135.23f, 4781.95f,  40.97f),
+            new Vector3(-1834.78f, 2978.91f,  31.81f),
+            new Vector3(-75.49f, -819.13f,  326.18f),
+            new Vector3(-1392.0f, -477.81f,  91.25f),
+            new Vector3(1711.41f, 3252.57f,  41.06f),
+        };
+
+        public static Vector3[][] AircraftPumps =
+        {
+            new Vector3[] {
+                new Vector3(1771.79f, 3239.86f,  42.27f),
+            },
+            new Vector3[]
+            {
+                new Vector3(-1145.84f, -2864.67f,  13.95f),
+            },
+            new Vector3[]
+            {
+                new Vector3(-1178.64f, -2846.0f,  13.95f),
+            },
+            new Vector3[]
+            {
+                new Vector3(-1112.27f, -2883.7f,  13.95f),
+            },
+            new Vector3[]
+            {
+                new Vector3(-982.41f, -3005.01f,  13.95f),
+            },
+            new Vector3[]
+            {
+                new Vector3(1732.1f, 3307.27f,  41.22f),
+            },
+            new Vector3[]
+            {
+                new Vector3(2135.23f, 4781.95f,  40.97f),
+            },
+            new Vector3[]
+            {
+                new Vector3(-1834.78f, 2978.91f,  31.81f),
+            },
+            new Vector3[]
+            {
+                new Vector3(-75.49f, -819.13f,  326.18f),
+            },
+            new Vector3[]
+            {
+                new Vector3(-1392.0f, -477.81f,  91.25f),
+            },
+            new Vector3[]
+            {
+                new Vector3(1711.41f, 3252.57f,  41.06f),
+            },
+        };
+
+        public static Vector3[] BoatPos =
+        {
+            new Vector3(-286.36f, 6622.2f,  0.19f),
+            new Vector3(-1648.58f, -1143.52f,  0.31f),
+            new Vector3(-1801.64f, -1233.98f,  0.13f),
+            new Vector3(528.45f, -3219.6f,  1.38f),
+        };
+
+        public static Vector3[][] BoatPumps =
+        {
+            new Vector3[] {
+                new Vector3(-286.36f, 6622.2f,  0.19f),
+            },
+            new Vector3[]
+            {
+                new Vector3(-1648.58f, -1143.52f,  0.31f),
+            },
+            new Vector3[]
+            {
+                new Vector3(-1801.64f, -1233.98f,  0.13f),
+            },
+            new Vector3[]
+            {
+                new Vector3(528.45f, -3219.6f,  1.38f),
+            },
         };
 
         public static Vector3[][] pumps =
@@ -277,7 +366,7 @@ namespace FRFuel
             {
                 new Vector3(-64.250f, -2533.900f,  6.140f),
                 new Vector3(-68.720f, -2530.710f,  6.140f),
-            }
+            },
         };
     }
 }
