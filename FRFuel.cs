@@ -271,36 +271,6 @@ namespace FRFuel
             return -1;
         }
 
-        public int GetAirStationIndexInRange(Vector3 pos, float rangeSquared)
-        {
-            for (int i = 0; i < Airblips.Length; i++)
-            {
-                Blip blip = Airblips[i];
-
-                if (Vector3.DistanceSquared(GasStations.AircraftPos[i], pos) < rangeSquared)
-                {
-                    return i;
-                }
-            }
-
-            return -1;
-        }
-
-        public int GetBoatStationIndexInRange(Vector3 pos, float rangeSquared)
-        {
-            for (int i = 0; i < Boatblips.Length; i++)
-            {
-                Blip blip = Boatblips[i];
-
-                if (Vector3.DistanceSquared(GasStations.BoatPos[i], pos) < rangeSquared)
-                {
-                    return i;
-                }
-            }
-
-            return -1;
-        }
-
         /// <summary>
         /// Returns "adequate" vehicle's petrol tank position
         /// </summary>
