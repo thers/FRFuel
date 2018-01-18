@@ -23,13 +23,27 @@ namespace FRFuel
         };
 
         protected Blip[] blips;
+        protected Blip[] Airblips;
+        protected Blip[] Boatblips;
         protected Pickup[] pickups;
 
-        protected float fuelTankCapacity = 65f;
+        protected float fuelTankCapacity = 100f;
 
         protected float fuelAccelerationImpact = 0.0002f;
         protected float fuelTractionImpact = 0.0001f;
         protected float fuelRPMImpact = 0.0005f;
+
+        protected float AirFuelPlaneAccelerationImpact = 0.0008f;
+        protected float AirFuelPlaneTractionImpact = 0.0005f;
+        protected float AirFuelPlaneRPMImpact = 0.0007f;
+
+        protected float AirFuelHeliAccelerationImpact = 0.0005f;
+        protected float AirFuelHeliTractionImpact = 0.0005f;
+        protected float AirFuelHeliRPMImpact = 0.0005f;
+
+        protected float BoatFuelAccelerationImpact = 0.00005f;
+        protected float BoatFuelTractionImpact = 0.00005f;
+        protected float BoatFuelRPMImpact = 0.00005f;
 
         public float showMarkerInRangeSquared = 250f;
 
@@ -71,12 +85,15 @@ namespace FRFuel
             {
                 if (toggle.GetType() == typeof(bool))
                 {
-                    refuelAllowed = (bool) toggle;
+                    refuelAllowed = (bool)toggle;
                 }
             });
 
             blips = new Blip[GasStations.positions.Length];
             pickups = new Pickup[GasStations.positions.Length];
+            Airblips = new Blip[GasStations.AircraftPos.Length];
+            Boatblips = new Blip[GasStations.BoatPos.Length];
+
 
             Tick += OnTick;
 
@@ -95,7 +112,7 @@ namespace FRFuel
             {
                 configContent = Function.Call<string>(Hash.LOAD_RESOURCE_FILE, "frfuel", "config.ini");
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 // nothing
             }
@@ -104,10 +121,10 @@ namespace FRFuel
 
             showHud = Config.Get("ShowHud", "true") == "true";
 
-            #if DEBUG
+#if DEBUG
             Debug.WriteLine($"CreatePickups: {Config.Get("CreatePickups", "true")}");
             Debug.WriteLine($"ShowHud: {Config.Get("ShowHud", "true")}");
-            #endif
+#endif
         }
 
         /// <summary>
@@ -130,6 +147,46 @@ namespace FRFuel
                 blip.Name = "Gas Station";
 
                 blips[i] = blip;
+            }
+        }
+
+        public void CreateAirBlips()
+        {
+            if (Config.Get("CreateBlips", "true") != "true")
+            {
+                return;
+            }
+
+            for (int i = 0; i < GasStations.AircraftPos.Length; i++)
+            {
+                var blip = World.CreateBlip(GasStations.AircraftPos[i]);
+                blip.Sprite = BlipSprite.JerryCan;
+                blip.Color = BlipColor.Red;
+                blip.Scale = 1f;
+                blip.IsShortRange = true;
+                blip.Name = "Aircraft Refueling";
+
+                Airblips[i] = blip;
+            }
+        }
+
+        public void CreateBoatBlips()
+        {
+            if (Config.Get("CreateBlips", "true") != "true")
+            {
+                return;
+            }
+
+            for (int i = 0; i < GasStations.BoatPos.Length; i++)
+            {
+                var blip = World.CreateBlip(GasStations.BoatPos[i]);
+                blip.Sprite = BlipSprite.JerryCan;
+                blip.Color = BlipColor.Blue;
+                blip.Scale = 1f;
+                blip.IsShortRange = true;
+                blip.Name = "Boat Refueling";
+
+                Boatblips[i] = blip;
             }
         }
 
@@ -172,11 +229,70 @@ namespace FRFuel
         /// <returns></returns>
         public int GetGasStationIndexInRange(Vector3 pos, float rangeSquared)
         {
-            for (int i = 0; i < blips.Length; i++)
-            {
-                Blip blip = blips[i];
+            Ped playerPed = Game.PlayerPed;
 
-                if (Vector3.DistanceSquared(GasStations.positions[i], pos) < rangeSquared)
+            if (playerPed.CurrentVehicle.Model.IsBike || playerPed.CurrentVehicle.Model.IsCar || playerPed.CurrentVehicle.Model.IsQuadbike)
+            {
+                for (int i = 0; i < blips.Length; i++)
+                {
+                    Blip blip = blips[i];
+
+                    if (Vector3.DistanceSquared(GasStations.positions[i], pos) < rangeSquared)
+                    {
+                        return i;
+                    }
+                }
+            }
+            else if (playerPed.CurrentVehicle.Model.IsPlane || playerPed.CurrentVehicle.Model.IsHelicopter)
+            {
+                for (int i = 0; i < Airblips.Length; i++)
+                {
+                    Blip blip = Airblips[i];
+
+                    if (Vector3.DistanceSquared(GasStations.AircraftPos[i], pos) < rangeSquared)
+                    {
+                        return i;
+                    }
+                }
+            }
+            else if (playerPed.CurrentVehicle.Model.IsBoat)
+            {
+                for (int i = 0; i < Boatblips.Length; i++)
+                {
+                    Blip blip = Boatblips[i];
+
+                    if (Vector3.DistanceSquared(GasStations.BoatPos[i], pos) < rangeSquared)
+                    {
+                        return i;
+                    }
+                }
+            }
+
+            return -1;
+        }
+
+        public int GetAirStationIndexInRange(Vector3 pos, float rangeSquared)
+        {
+            for (int i = 0; i < Airblips.Length; i++)
+            {
+                Blip blip = Airblips[i];
+
+                if (Vector3.DistanceSquared(GasStations.AircraftPos[i], pos) < rangeSquared)
+                {
+                    return i;
+                }
+            }
+
+            return -1;
+        }
+
+        public int GetBoatStationIndexInRange(Vector3 pos, float rangeSquared)
+        {
+            for (int i = 0; i < Boatblips.Length; i++)
+            {
+                Blip blip = Boatblips[i];
+
+                if (Vector3.DistanceSquared(GasStations.BoatPos[i], pos) < rangeSquared)
                 {
                     return i;
                 }
@@ -194,7 +310,7 @@ namespace FRFuel
         {
             EntityBone bone = null;
 
-            foreach(var boneName in tankBones)
+            foreach (var boneName in tankBones)
             {
                 var boneIndex = Function.Call<int>(
                     Hash.GET_ENTITY_BONE_INDEX_BY_NAME,
@@ -226,18 +342,42 @@ namespace FRFuel
         /// <returns></returns>
         public bool IsVehicleNearAnyPump(Vehicle vehicle)
         {
+            Ped playerPed = Game.PlayerPed;
             var fuelTankPos = GetVehicleTankPos(vehicle);
-
-            foreach (var pump in GasStations.pumps[currentGasStationIndex])
+            if (playerPed.CurrentVehicle.Model.IsCar || playerPed.CurrentVehicle.Model.IsQuadbike || playerPed.CurrentVehicle.Model.IsBike)
             {
-                if (Vector3.DistanceSquared(pump, fuelTankPos) <= 20f)
+                foreach (var pump in GasStations.pumps[currentGasStationIndex])
                 {
-                    return true;
+                    if (Vector3.DistanceSquared(pump, fuelTankPos) <= 20f)
+                    {
+                        return true;
+                    }
+                }
+            }
+            else if (playerPed.CurrentVehicle.Model.IsPlane || playerPed.CurrentVehicle.Model.IsHelicopter)
+            {
+                foreach (var pump in GasStations.AircraftPumps[currentGasStationIndex])
+                {
+                    if (Vector3.DistanceSquared(pump, fuelTankPos) <= 20f)
+                    {
+                        return true;
+                    }
+                }
+            }
+            else if (playerPed.CurrentVehicle.Model.IsBoat)
+            {
+                foreach (var pump in GasStations.BoatPumps[currentGasStationIndex])
+                {
+                    if (Vector3.DistanceSquared(pump, fuelTankPos) <= 35f)
+                    {
+                        return true;
+                    }
                 }
             }
 
             return false;
         }
+
 
         /// <summary>
         /// Processes fuel consumption
@@ -247,14 +387,49 @@ namespace FRFuel
         {
             float fuel = VehicleFuelLevel(vehicle);
 
+            Ped playerPed = Game.PlayerPed;
+
             // Consuming
-            if (fuel > 0 && vehicle.IsEngineRunning)
+            if (fuel > 0 && vehicle.IsEngineRunning && (playerPed.CurrentVehicle.Model.IsCar || playerPed.CurrentVehicle.Model.IsBike || playerPed.CurrentVehicle.Model.IsQuadbike))
             {
-                float normalizedRPMValue = (float) Math.Pow(vehicle.CurrentRPM, 1.5);
+                float normalizedRPMValue = (float)Math.Pow(vehicle.CurrentRPM, 1.5);
 
                 fuel -= normalizedRPMValue * fuelRPMImpact;
                 fuel -= vehicle.Acceleration * fuelAccelerationImpact;
                 fuel -= vehicle.MaxTraction * fuelTractionImpact;
+
+                fuel = fuel < 0f ? 0f : fuel;
+            }
+
+            if (fuel > 0 && vehicle.IsEngineRunning && playerPed.CurrentVehicle.Model.IsPlane)
+            {
+                float normalizedRPMValue = (float)Math.Pow(vehicle.CurrentRPM, 1.5);
+
+                fuel -= normalizedRPMValue * AirFuelPlaneRPMImpact;
+                fuel -= vehicle.Acceleration * AirFuelPlaneAccelerationImpact;
+                fuel -= vehicle.MaxTraction * AirFuelPlaneTractionImpact;
+
+                fuel = fuel < 0f ? 0f : fuel;
+            }
+
+            if (fuel > 0 && vehicle.IsEngineRunning && playerPed.CurrentVehicle.Model.IsHelicopter)
+            {
+                float normalizedRPMValue = (float)Math.Pow(vehicle.CurrentRPM, 1.5);
+
+                fuel -= normalizedRPMValue * AirFuelHeliRPMImpact;
+                fuel -= vehicle.Acceleration * AirFuelHeliAccelerationImpact;
+                fuel -= vehicle.MaxTraction * AirFuelHeliTractionImpact;
+
+                fuel = fuel < 0f ? 0f : fuel;
+            }
+
+            if (fuel > 0 && vehicle.IsEngineRunning && playerPed.CurrentVehicle.Model.IsBoat)
+            {
+                float normalizedRPMValue = (float)Math.Pow(vehicle.CurrentRPM, 1.5);
+
+                fuel -= normalizedRPMValue * BoatFuelRPMImpact;
+                fuel -= vehicle.Acceleration * BoatFuelAccelerationImpact;
+                fuel -= vehicle.MaxTraction * BoatFuelTractionImpact;
 
                 fuel = fuel < 0f ? 0f : fuel;
             }
@@ -414,7 +589,7 @@ namespace FRFuel
             float min = fuelLevel / 3f;
             float max = fuelLevel - (fuelLevel / 4);
 
-            return (float) ((random.NextDouble() * (max - min)) + min);
+            return (float)((random.NextDouble() * (max - min)) + min);
         }
 
         /// <summary>
@@ -482,7 +657,9 @@ namespace FRFuel
 
                 if (
                   vehicleHandle != 0 &&
-                  vehicle.HasDecor(fuelLevelPropertyName)
+                  vehicle.HasDecor(fuelLevelPropertyName) &&
+                  !vehicle.Model.IsPlane &&
+                  !vehicle.Model.IsHelicopter
                 )
                 {
                     float max = VehicleMaxFuelLevel(vehicle);
@@ -550,6 +727,8 @@ namespace FRFuel
                 LoadConfig();
 
                 CreateBlips();
+                CreateAirBlips();
+                CreateBoatBlips();
                 CreateJerryCanPickUps();
             }
 
@@ -562,7 +741,10 @@ namespace FRFuel
               (
                 playerPed.CurrentVehicle.Model.IsCar ||
                 playerPed.CurrentVehicle.Model.IsBike ||
-                playerPed.CurrentVehicle.Model.IsQuadbike
+                playerPed.CurrentVehicle.Model.IsQuadbike ||
+                playerPed.CurrentVehicle.Model.IsHelicopter ||
+                playerPed.CurrentVehicle.Model.IsPlane ||
+                playerPed.CurrentVehicle.Model.IsBoat
               ) &&
               playerPed.CurrentVehicle.GetPedOnSeat(VehicleSeat.Driver) == playerPed &&
               playerPed.CurrentVehicle.IsAlive
