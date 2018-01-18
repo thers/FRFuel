@@ -48,7 +48,7 @@ namespace FRFuel
             new Vector3(-1834.78f, 2978.91f,  31.81f),
             new Vector3(-75.49f, -819.13f,  326.18f),
             new Vector3(-1392.0f, -477.81f,  91.25f),
-            new Vector3(1711.41f, 3252.57f,  41.06f),
+            new Vector3(1732.59f, 3306.17f,  41.74f),
         };
 
         public static Vector3[][] AircraftPumps =
@@ -94,7 +94,7 @@ namespace FRFuel
             },
             new Vector3[]
             {
-                new Vector3(1711.41f, 3252.57f,  41.06f),
+                new Vector3(1732.59f, 3306.17f,  41.74f),
             },
         };
 
