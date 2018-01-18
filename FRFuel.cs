@@ -593,7 +593,7 @@ namespace FRFuel
             }
             else
             {
-                return 65f;
+                return 100f;
             }
         }
 
