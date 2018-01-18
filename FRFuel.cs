@@ -114,7 +114,7 @@ namespace FRFuel
             }
             catch (Exception e)
             {
-                // nothing
+                Debug.WriteLine($"Config file not found! Error:" + e);
             }
 
             Config = new Config(configContent);
