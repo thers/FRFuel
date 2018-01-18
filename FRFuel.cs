@@ -33,13 +33,13 @@ namespace FRFuel
         protected float fuelTractionImpact = 0.0001f;
         protected float fuelRPMImpact = 0.0005f;
 
-        protected float AirFuelPlaneAccelerationImpact = 0.0008f;
-        protected float AirFuelPlaneTractionImpact = 0.0005f;
-        protected float AirFuelPlaneRPMImpact = 0.0007f;
+        protected float AirFuelPlaneAccelerationImpact = 0.0002f;
+        protected float AirFuelPlaneTractionImpact = 0.0003f;
+        protected float AirFuelPlaneRPMImpact = 0.00005f;
 
-        protected float AirFuelHeliAccelerationImpact = 0.0005f;
-        protected float AirFuelHeliTractionImpact = 0.0005f;
-        protected float AirFuelHeliRPMImpact = 0.0005f;
+        protected float AirFuelHeliAccelerationImpact = 0.0002f;
+        protected float AirFuelHeliTractionImpact = 0.0002f;
+        protected float AirFuelHeliRPMImpact = 0.0002f;
 
         protected float BoatFuelAccelerationImpact = 0.00005f;
         protected float BoatFuelTractionImpact = 0.00005f;
