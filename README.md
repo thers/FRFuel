@@ -1,6 +1,6 @@
 # FRFuel
 
-[![Build status](https://ci.appveyor.com/api/projects/status/vupxr6p40fgncl4w?svg=true)](https://ci.appveyor.com/project/thers)
+[![Build status](https://ci.appveyor.com/api/projects/status/yhfowk532upvo0fv?svg=true)](https://ci.appveyor.com/project/IllusiveTea/frfuel)
 
 ## Features
 
