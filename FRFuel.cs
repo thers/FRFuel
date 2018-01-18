@@ -160,8 +160,8 @@ namespace FRFuel
             for (int i = 0; i < GasStations.AircraftPos.Length; i++)
             {
                 var blip = World.CreateBlip(GasStations.AircraftPos[i]);
-                blip.Sprite = BlipSprite.JerryCan;
-                blip.Color = BlipColor.Red;
+                blip.Sprite = BlipSprite.JerryCan2;
+                blip.Color = BlipColor.FranklinGreen;
                 blip.Scale = 1f;
                 blip.IsShortRange = true;
                 blip.Name = "Aircraft Refueling";
@@ -180,7 +180,7 @@ namespace FRFuel
             for (int i = 0; i < GasStations.BoatPos.Length; i++)
             {
                 var blip = World.CreateBlip(GasStations.BoatPos[i]);
-                blip.Sprite = BlipSprite.JerryCan;
+                blip.Sprite = BlipSprite.Speedboat;
                 blip.Color = BlipColor.Blue;
                 blip.Scale = 1f;
                 blip.IsShortRange = true;
