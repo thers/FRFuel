@@ -17,5 +17,5 @@ build:
   project: FRFuel.sln
 
 after_build:
-- 7z a frfuel-edited_%FRFUEL_VERSION%.zip %APPVEYOR_BUILD_FOLDER%\dist\*
-- 7z a frfuel-edited_%FRFUEL_VERSION%.zip %APPVEYOR_BUILD_FOLDER%\bin\Release\frfuel.net.dll
+- 7z a frfuel_%FRFUEL_VERSION%.zip %APPVEYOR_BUILD_FOLDER%\dist\*
+- 7z a frfuel_%FRFUEL_VERSION%.zip %APPVEYOR_BUILD_FOLDER%\bin\Release\frfuel.net.dll
