@@ -437,6 +437,10 @@ namespace FRFuel
 
                     if (refuelAllowed)
                     {
+                        
+                        Game.DisableControlThisFrame(0, Control.VehicleFlyAttack);
+                        Game.DisableControlThisFrame(0, Control.VehicleFlyAttack2);
+                    
                         if (Game.IsControlPressed(0, Control.Jump))
                         {
                             if (fuel < fuelTankCapacity)
