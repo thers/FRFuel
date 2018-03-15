@@ -358,7 +358,7 @@ namespace FRFuel
         /// <param name="playerPed"></param>
         public void RenderUI(Ped playerPed)
         {
-            if (showHud)
+            if (showHud && API.IsHudPreferenceSwitchedOn())
             {
                 hud.RenderBar(playerPed.CurrentVehicle.FuelLevel, fuelTankCapacity);
             }
