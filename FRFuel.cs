@@ -340,7 +340,8 @@ namespace FRFuel
                 if (vehicle.IsEngineRunning)
                 {
                     vehicle.IsDriveable = false;
-                    vehicle.IsEngineRunning = false;
+                    //vehicle.IsEngineRunning = false;
+                    API.SetVehicleEngineOn(vehicle.Handle, false, true, true); // temporary fix for when the engine keeps turning back on.
                 }
                 else
                 {
