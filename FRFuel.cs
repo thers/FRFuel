@@ -71,7 +71,7 @@ namespace FRFuel
             {
                 if (toggle.GetType() == typeof(bool))
                 {
-                    refuelAllowed = (bool) toggle;
+                    refuelAllowed = (bool)toggle;
                 }
             });
 
@@ -95,19 +95,19 @@ namespace FRFuel
             {
                 configContent = Function.Call<string>(Hash.LOAD_RESOURCE_FILE, "frfuel", "config.ini");
             }
-            catch(Exception e)
+            catch (Exception e)
             {
-                // nothing
+                Debug.WriteLine($"An error occurred while loading the config file, error description: {e.Message}.");
             }
 
             Config = new Config(configContent);
 
             showHud = Config.Get("ShowHud", "true") == "true";
 
-            #if DEBUG
+#if DEBUG
             Debug.WriteLine($"CreatePickups: {Config.Get("CreatePickups", "true")}");
             Debug.WriteLine($"ShowHud: {Config.Get("ShowHud", "true")}");
-            #endif
+#endif
         }
 
         /// <summary>
@@ -194,7 +194,7 @@ namespace FRFuel
         {
             EntityBone bone = null;
 
-            foreach(var boneName in tankBones)
+            foreach (var boneName in tankBones)
             {
                 var boneIndex = Function.Call<int>(
                     Hash.GET_ENTITY_BONE_INDEX_BY_NAME,
@@ -250,7 +250,7 @@ namespace FRFuel
             // Consuming
             if (fuel > 0 && vehicle.IsEngineRunning)
             {
-                float normalizedRPMValue = (float) Math.Pow(vehicle.CurrentRPM, 1.5);
+                float normalizedRPMValue = (float)Math.Pow(vehicle.CurrentRPM, 1.5);
 
                 fuel -= normalizedRPMValue * fuelRPMImpact;
                 fuel -= vehicle.Acceleration * fuelAccelerationImpact;
@@ -415,7 +415,7 @@ namespace FRFuel
             float min = fuelLevel / 3f;
             float max = fuelLevel - (fuelLevel / 4);
 
-            return (float) ((random.NextDouble() * (max - min)) + min);
+            return (float)((random.NextDouble() * (max - min)) + min);
         }
 
         /// <summary>
