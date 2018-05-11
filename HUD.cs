@@ -24,7 +24,6 @@ namespace FRFuel
         protected Tween<float> fuelBarColorTween = new FloatTween();
         protected bool fuelBarAnimationDir = true;
         protected PointF basePosition = new PointF(0f, 584f);
-        public static Control engineToggleControl = Control.VehicleHorn;
 
         public PointF Position
         {
@@ -142,7 +141,7 @@ namespace FRFuel
             buttons.CallFunction("TOGGLE_MOUSE_BUTTONS", 0);
             buttons.CallFunction("CREATE_CONTAINER");
 
-            buttons.CallFunction("SET_DATA_SLOT", 0, Function.Call<string>((Hash)0x0499D7B09FC9B407, 2, (int)engineToggleControl, 0), "Turn off engine");
+            buttons.CallFunction("SET_DATA_SLOT", 0, Function.Call<string>((Hash)0x0499D7B09FC9B407, 2, (int)FRFuel.engineToggleControl, 0), "Turn off engine");
 
             buttons.CallFunction("DRAW_INSTRUCTIONAL_BUTTONS", -1);
         }
@@ -190,7 +189,7 @@ namespace FRFuel
             buttons.CallFunction("CREATE_CONTAINER");
 
             buttons.CallFunction("SET_DATA_SLOT", 0, Function.Call<string>((Hash)0x0499D7B09FC9B407, 2, (int)Control.Jump, 0), "Refuel");
-            buttons.CallFunction("SET_DATA_SLOT", 1, Function.Call<string>((Hash)0x0499D7B09FC9B407, 2, (int)engineToggleControl, 0), "Turn on engine");
+            buttons.CallFunction("SET_DATA_SLOT", 1, Function.Call<string>((Hash)0x0499D7B09FC9B407, 2, (int)FRFuel.engineToggleControl, 0), "Turn on engine");
 
             buttons.CallFunction("DRAW_INSTRUCTIONAL_BUTTONS", -1);
         }

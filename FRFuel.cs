@@ -52,6 +52,7 @@ namespace FRFuel
         protected bool showHud = true;
 
         protected bool initialized = false;
+        public static Control engineToggleControl = Control.VehicleHorn;
         #endregion
 
         /// <summary>
@@ -107,7 +108,7 @@ namespace FRFuel
             // if a valid key is set in the config file, set the control.
             if (int.TryParse(Config.Get("EngineToggleKey", "86"), out int tmpControl))
             {
-                HUD.engineToggleControl = (Control)tmpControl;
+                engineToggleControl = (Control)tmpControl;
             }
 #if DEBUG
             Debug.WriteLine($"CreatePickups: {Config.Get("CreatePickups", "true")}");
@@ -341,7 +342,7 @@ namespace FRFuel
         /// <param name="vehicle"></param>
         public void ControlEngine(Vehicle vehicle)
         {
-            if (Game.IsControlJustReleased(0, HUD.engineToggleControl) && !Game.IsControlPressed(0, Control.Jump))
+            if (Game.IsControlJustReleased(0, engineToggleControl) && !Game.IsControlPressed(0, Control.Jump))
             {
                 if (vehicle.IsEngineRunning)
                 {
