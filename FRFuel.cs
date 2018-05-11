@@ -104,9 +104,15 @@ namespace FRFuel
 
             showHud = Config.Get("ShowHud", "true") == "true";
 
+            // if a valid key is set in the config file, set the control.
+            if (int.TryParse(Config.Get("EngineToggleKey", "86"), out int tmpControl))
+            {
+                HUD.engineToggleControl = (Control)tmpControl;
+            }
 #if DEBUG
             Debug.WriteLine($"CreatePickups: {Config.Get("CreatePickups", "true")}");
             Debug.WriteLine($"ShowHud: {Config.Get("ShowHud", "true")}");
+            Debug.WriteLine($"EngineToggleKey: {Config.Get("EngineToggleKey", "86")}");
 #endif
         }
 
@@ -335,7 +341,7 @@ namespace FRFuel
         /// <param name="vehicle"></param>
         public void ControlEngine(Vehicle vehicle)
         {
-            if (Game.IsControlJustReleased(0, Control.VehicleHorn) && !Game.IsControlPressed(0, Control.Jump))
+            if (Game.IsControlJustReleased(0, HUD.engineToggleControl) && !Game.IsControlPressed(0, Control.Jump))
             {
                 if (vehicle.IsEngineRunning)
                 {

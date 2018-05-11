@@ -30,7 +30,7 @@ namespace FRFuel
 
         public static void RegisterProperty(string propertyName, DecorationType type)
         {
-            Function.Call(Hash.DECOR_REGISTER, propertyName, (int) type);
+            Function.Call(Hash.DECOR_REGISTER, propertyName, (int)type);
         }
 
         public static void Set(Entity entity, string propertyName, float floatValue)
@@ -90,7 +90,7 @@ namespace FRFuel
                 throw new EntityDecorationUndefinedTypeException();
             }
 
-            return (T) Function.Call<T>(nativeMethod, entity.NativeValue, propertyName);
+            return (T)Function.Call<T>(nativeMethod, entity.NativeValue, propertyName);
         }
 
         public static T GetDecor<T>(this Entity ent, string propertyName)
