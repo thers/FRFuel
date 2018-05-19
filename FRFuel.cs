@@ -94,7 +94,7 @@ namespace FRFuel
 
             try
             {
-                configContent = Function.Call<string>(Hash.LOAD_RESOURCE_FILE, "frfuel", "config.ini");
+                configContent = Function.Call<string>(Hash.LOAD_RESOURCE_FILE, Function.Call<string>(Hash.GET_CURRENT_RESOURCE_NAME), "config.ini");
             }
             catch (Exception e)
             {
