@@ -9,6 +9,9 @@ namespace FRFuel
 {
     public class FRFuel : BaseScript
     {
+        delegate float GetCurrentFuelLevelDelegate();
+        delegate void AddFuel(float amount);
+        delegate void SetFuel(float amount);
 
         #region Fields
         public static string fuelLevelPropertyName = "_Fuel_Level";
@@ -79,9 +82,13 @@ namespace FRFuel
             blips = new Blip[GasStations.positions.Length];
             pickups = new Pickup[GasStations.positions.Length];
 
-            Tick += OnTick;
-
             EntityDecoration.RegisterProperty(fuelLevelPropertyName, DecorationType.Float);
+
+            Exports.Add("addFuel", new AddFuel(ExportsAddFuel));
+            Exports.Add("setFuel", new SetFuel(ExportsSetFuel));
+            Exports.Add("getCurrentFuelLevel", new GetCurrentFuelLevelDelegate(ExportsGetCurrentFuelLevel));
+
+            Tick += OnTick;
         }
 
         #region Init
@@ -170,6 +177,48 @@ namespace FRFuel
             }
         }
         #endregion
+
+        /// <summary>
+        /// External API for getting current fuel leve;
+        /// </summary>
+        /// <returns></returns>
+        public float ExportsGetCurrentFuelLevel()
+        {
+            if (!PlayerVehicleViableForFuel())
+            {
+                return -1f;
+            }
+
+            return Game.PlayerPed.CurrentVehicle.FuelLevel;
+        }
+
+        /// <summary>
+        /// External API for adding fuel
+        /// </summary>
+        /// <param name="amount"></param>
+        public void ExportsAddFuel(float amount)
+        {
+            if (PlayerVehicleViableForFuel())
+            {
+                var vehicle = Game.PlayerPed.CurrentVehicle;
+
+                VehicleSetFuelLevel(vehicle, vehicle.FuelLevel + amount);
+            }
+        }
+
+        /// <summary>
+        /// External API for setting fuel level
+        /// </summary>
+        /// <param name="amount"></param>
+        public void ExportsSetFuel(float amount)
+        {
+            if (PlayerVehicleViableForFuel())
+            {
+                var vehicle = Game.PlayerPed.CurrentVehicle;
+
+                VehicleSetFuelLevel(vehicle, amount);
+            }
+        }
 
         /// <summary>
         /// Returns gas station position that is in range
@@ -545,6 +594,21 @@ namespace FRFuel
             }
         }
 
+        protected bool PlayerVehicleViableForFuel()
+        {
+            Ped playerPed = Game.PlayerPed;
+            Vehicle vehicle = playerPed.CurrentVehicle;
+
+            return playerPed.IsInVehicle() &&
+              (
+                vehicle.Model.IsCar ||
+                vehicle.Model.IsBike ||
+                vehicle.Model.IsQuadbike
+              ) &&
+              vehicle.GetPedOnSeat(VehicleSeat.Driver) == playerPed &&
+              vehicle.IsAlive;
+        }
+
         /// <summary>
         /// On tick
         /// </summary>
@@ -564,19 +628,10 @@ namespace FRFuel
             hud.ReloadScaleformMovie();
 
             Ped playerPed = Game.PlayerPed;
+            Vehicle vehicle = playerPed.CurrentVehicle;
 
-            if (
-              playerPed.IsInVehicle() &&
-              (
-                playerPed.CurrentVehicle.Model.IsCar ||
-                playerPed.CurrentVehicle.Model.IsBike ||
-                playerPed.CurrentVehicle.Model.IsQuadbike
-              ) &&
-              playerPed.CurrentVehicle.GetPedOnSeat(VehicleSeat.Driver) == playerPed &&
-              playerPed.CurrentVehicle.IsAlive
-            )
+            if (PlayerVehicleViableForFuel())
             {
-                Vehicle vehicle = playerPed.CurrentVehicle;
 
                 if (lastVehicle != vehicle)
                 {
