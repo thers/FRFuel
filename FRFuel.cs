@@ -79,6 +79,8 @@ namespace FRFuel
                 }
             });
 
+            GasStations.LoadGasStations();
+
             blips = new Blip[GasStations.positions.Length];
             pickups = new Pickup[GasStations.positions.Length];
 
