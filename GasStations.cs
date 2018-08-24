@@ -53,24 +53,16 @@ namespace FRFuel
 
                     positions[i] = location;
 
-                    List<Vector3> tempPumps = new List<Vector3>();
-                    foreach (var pump in gasStation["pumps"])
+                    Newtonsoft.Json.Linq.JArray pumpsList = (Newtonsoft.Json.Linq.JArray)gasStation["pumps"];
+                    pumps[i] = new Vector3[pumpsList.Count];
+                    for (int p = 0; p < pumpsList.Count; p++)
                     {
-                        Vector3 pumpLocation = new Vector3(
-                            float.Parse(pump["X"].ToString()),
-                            float.Parse(pump["Y"].ToString()),
-                            float.Parse(pump["Z"].ToString())
+                        pumps[i][p] = new Vector3(
+                            float.Parse(pumpsList[p]["X"].ToString()),
+                            float.Parse(pumpsList[p]["Y"].ToString()),
+                            float.Parse(pumpsList[p]["Z"].ToString())
                             );
-                        tempPumps.Add(pumpLocation);
                     }
-                    pumps[i] = new Vector3[tempPumps.Count];
-                    for (var pump = 0; pump < tempPumps.Count; pump++)
-                    {
-                        pumps[i][pump] = tempPumps[pump];
-                    }
-
-                    tempPumps = null;
-
                     i++;
                 }
 
