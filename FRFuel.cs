@@ -1,4 +1,4 @@
-﻿#undef MANUAL_ENGINE_CUTOFF
+#undef MANUAL_ENGINE_CUTOFF
 
 using System;
 using System.Threading.Tasks;
@@ -30,6 +30,7 @@ namespace FRFuel
 
         protected float fuelTankCapacity = 65f;
 
+        protected float fuelConsumptionRate = 1f;
         protected float fuelAccelerationImpact = 0.0002f;
         protected float fuelTractionImpact = 0.0001f;
         protected float fuelRPMImpact = 0.0005f;
@@ -113,6 +114,18 @@ namespace FRFuel
             Config = new Config(configContent);
 
             showHud = Config.Get("ShowHud", "true") == "true";
+            
+            var fuelConsumptionString = Config.Get("FuelConsumptionRate", "1");
+            if (float.TryParse(fuelConsumptionString, out float tmpFuelConsumptionRate))
+            {
+                fuelConsumptionRate = tmpFuelConsumptionRate;
+            }
+#if DEBUG
+            else
+            {
+                Debug.WriteLine("Invalid FuelConsumptionRate value. Make sure it is a valid float value, i.e. 1.2");
+            }
+#endif
 
             // if a valid key is set in the config file, set the control.
             if (int.TryParse(Config.Get("EngineToggleKey", "86"), out int tmpControl))
@@ -123,6 +136,7 @@ namespace FRFuel
             Debug.WriteLine($"CreatePickups: {Config.Get("CreatePickups", "true")}");
             Debug.WriteLine($"ShowHud: {Config.Get("ShowHud", "true")}");
             Debug.WriteLine($"EngineToggleKey: {Config.Get("EngineToggleKey", "86")}");
+            Debug.WriteLine($"FuelConsumptionRate: {Config.Get("FuelConsumptionRate", "1")}");
 #endif
         }
 
@@ -309,11 +323,13 @@ namespace FRFuel
             if (fuel > 0 && vehicle.IsEngineRunning)
             {
                 float normalizedRPMValue = (float)Math.Pow(vehicle.CurrentRPM, 1.5);
+                float consumedFuel = 0f;
 
-                fuel -= normalizedRPMValue * fuelRPMImpact;
-                fuel -= vehicle.Acceleration * fuelAccelerationImpact;
-                fuel -= vehicle.MaxTraction * fuelTractionImpact;
-
+                consumedFuel += normalizedRPMValue * fuelRPMImpact;
+                consumedFuel += vehicle.Acceleration * fuelAccelerationImpact;
+                consumedFuel += vehicle.MaxTraction * fuelTractionImpact;
+                
+                fuel -= consumedFuel * fuelConsumptionRate;
                 fuel = fuel < 0f ? 0f : fuel;
             }
 
