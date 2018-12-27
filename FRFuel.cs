@@ -1,6 +1,8 @@
 #undef MANUAL_ENGINE_CUTOFF
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using CitizenFX.Core;
 using CitizenFX.Core.Native;
@@ -26,7 +28,7 @@ namespace FRFuel
         };
 
         protected Blip[] blips;
-        protected Pickup[] pickups;
+        protected List<Pickup> pickups;
 
         protected float fuelTankCapacity = 65f;
 
@@ -83,7 +85,7 @@ namespace FRFuel
             GasStations.LoadGasStations();
 
             blips = new Blip[GasStations.positions.Length];
-            pickups = new Pickup[GasStations.positions.Length];
+            pickups = new List<Pickup>();
 
             EntityDecoration.RegisterProperty(fuelLevelPropertyName, DecorationType.Float);
 
@@ -164,32 +166,55 @@ namespace FRFuel
         }
 
         /// <summary>
-        /// Creates jerry cans pick-ups at the gas stations
+        /// Gets coordinates for jerry cans within 100f radius
         /// </summary>
-        public void CreateJerryCanPickUps()
+        /// <param name="position"></param>
+        /// <returns>List of coordinates for pickups</returns>
+        public IEnumerable<Vector3> GetNearbyJerryCanPickUpCoordinates(Vector3 position)
+        {
+            return GasStations.positions.Where(p => p.DistanceToSquared(position) < 100.0f);
+        }
+
+        /// <summary>
+        /// Automatically adds pickups for nearby jerry cans, and removes when leaving area
+        /// </summary>
+        public async Task ManageNearbyJerryCanPickUps()
         {
             if (Config.Get("CreatePickups", "true") != "true")
             {
                 return;
             }
 
+            Vector3 pos = Function.Call<Vector3>(Hash.GET_ENTITY_COORDS, Function.Call<int>(Hash.PLAYER_PED_ID));
+
             int model = 883325847;
 
             Function.Call(Hash.REQUEST_MODEL, model);
 
-            for (int i = 0; i < GasStations.positions.Length; i++)
+            IEnumerable<Vector3> positions = GetNearbyJerryCanPickUpCoordinates(pos);
+
+            if (positions.Count() == 0 && pickups.Count != 0)
             {
-                Vector3 p = GasStations.positions[i];
+                pickups.ForEach(p => p.Delete());
+                pickups.Clear();
+            }
+            else
+            {
+                positions.ToList().ForEach(position => {
+                    if (!pickups.Any(pickup => position.DistanceToSquared(pickup.Position) < 5f))
+                    {
+                        // add pickup if one doesn't exist within 5f proximity of it
+                        Pickup pickup = new Pickup(Function.Call<int>(
+                          Hash.CREATE_PICKUP,
+                          -962731009, // Petrol Can
+                          position.X, position.Y, position.Z - 0.5f,
+                          8 | 32, // Place on the ground, local only
+                          true, model
+                        ));
 
-                Pickup pickup = new Pickup(Function.Call<int>(
-                  Hash.CREATE_PICKUP,
-                  -962731009, // Petrol Can
-                  p.X, p.Y, p.Z - 0.5f,
-                  8, // Place on the ground
-                  true, model
-                ));
-
-                pickups[i] = pickup;
+                        pickups.Add(pickup);
+                    }
+                });
             }
         }
         #endregion
@@ -640,8 +665,9 @@ namespace FRFuel
                 LoadConfig();
 
                 CreateBlips();
-                CreateJerryCanPickUps();
             }
+
+            await ManageNearbyJerryCanPickUps();
 
             hud.ReloadScaleformMovie();
 
