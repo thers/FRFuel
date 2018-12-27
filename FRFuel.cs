@@ -195,8 +195,6 @@ namespace FRFuel
 
             if (positions.Count() == 0 && pickups.Count != 0)
             {
-                Debug.WriteLine("removing nearby jerry cans");
-
                 pickups.ForEach(p => p.Delete());
                 pickups.Clear();
             }
