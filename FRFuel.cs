@@ -191,11 +191,6 @@ namespace FRFuel
 
             Function.Call(Hash.REQUEST_MODEL, model);
 
-            while (Function.Call<bool>(Hash.HAS_MODEL_LOADED, model))
-            {
-                await BaseScript.Delay(50);
-            }
-
             IEnumerable<Vector3> positions = GetNearbyJerryCanPickUpCoordinates(pos);
 
             if (positions.Count() == 0 && pickups.Count != 0)
