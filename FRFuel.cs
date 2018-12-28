@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using CitizenFX.Core;
 using CitizenFX.Core.Native;
+using static CitizenFX.Core.Native.API;
 
 namespace FRFuel
 {
@@ -106,7 +107,7 @@ namespace FRFuel
 
             try
             {
-                configContent = Function.Call<string>(Hash.LOAD_RESOURCE_FILE, Function.Call<string>(Hash.GET_CURRENT_RESOURCE_NAME), "config.ini");
+                configContent = LoadResourceFile(GetCurrentResourceName(), "config.ini");
             }
             catch (Exception e)
             {
@@ -185,7 +186,7 @@ namespace FRFuel
                 return;
             }
 
-            Vector3 pos = Function.Call<Vector3>(Hash.GET_ENTITY_COORDS, Function.Call<int>(Hash.PLAYER_PED_ID));
+            Vector3 pos = GetEntityCoords(PlayerPedId(), true);
 
             int model = 883325847;
 
@@ -204,13 +205,15 @@ namespace FRFuel
                     if (!pickups.Any(pickup => position.DistanceToSquared(pickup.Position) < 5f))
                     {
                         // add pickup if one doesn't exist within 5f proximity of it
-                        Pickup pickup = new Pickup(Function.Call<int>(
-                          Hash.CREATE_PICKUP,
-                          -962731009, // Petrol Can
-                          position.X, position.Y, position.Z - 0.5f,
-                          8 | 32, // Place on the ground, local only
-                          true, model
-                        ));
+                        int pickupHandle = CreatePickup(
+                            0xc69de3ff, // Petrol Can
+                            position.X, position.Y, position.Z - 0.5f,
+                            8 | 32, // Place on the ground, local only
+                            0,
+                            true,
+                            (uint)model);
+
+                        Pickup pickup = new Pickup(pickupHandle);
 
                         pickups.Add(pickup);
                     }
@@ -293,11 +296,7 @@ namespace FRFuel
 
             foreach (var boneName in tankBones)
             {
-                var boneIndex = Function.Call<int>(
-                    Hash.GET_ENTITY_BONE_INDEX_BY_NAME,
-                    vehicle,
-                    boneName
-                );
+                var boneIndex = GetEntityBoneIndexByName(vehicle.Handle, boneName);
 
                 bone = vehicle.Bones[boneIndex];
 
@@ -559,12 +558,7 @@ namespace FRFuel
         /// <returns></returns>
         public float VehicleMaxFuelLevel(Vehicle vehicle)
         {
-            return Function.Call<float>(
-                (Hash)0x642FC12F,
-                vehicle,
-                "CHandlingData",
-                "fPetrolTankVolume"
-            );
+            return GetVehicleHandlingFloat(vehicle.Handle, "CHandlingData", "fPetrolTankVolume");
         }
 
         /// <summary>
@@ -577,7 +571,7 @@ namespace FRFuel
             {
                 Vector3 pos = playerPed.Position;
 
-                int vehicleHandle = Function.Call<int>(Hash.GET_CLOSEST_VEHICLE, pos.X, pos.Y, pos.Z, 3f, 0, 70);
+                int vehicleHandle = GetClosestVehicle(pos.X, pos.Y, pos.Z, 3f, 0, 70);
                 Vehicle vehicle = new Vehicle(vehicleHandle);
 
                 if (

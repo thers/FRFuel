@@ -1,5 +1,6 @@
 ﻿using CitizenFX.Core;
 using CitizenFX.Core.Native;
+using static CitizenFX.Core.Native.API;
 
 namespace FRFuel
 {
@@ -95,14 +96,14 @@ namespace FRFuel
 
         public void RewindAndStop(Ped ped)
         {
-            Function.Call(Hash.STOP_ENTITY_ANIM, ped.NativeValue, loop.name, loop.dict, true);
+            StopEntityAnim(ped.Handle, loop.name, loop.dict, 1f);
 
             PlayEnd(ped);
         }
 
         protected bool IsAnimationPlaying(Ped ped, Animation anim)
         {
-            return Function.Call<bool>(Hash.IS_ENTITY_PLAYING_ANIM, ped.NativeValue, anim.dict, anim.name, 3);
+            return IsEntityPlayingAnim(ped.Handle, anim.dict, anim.name, 3);
         }
     }
 }

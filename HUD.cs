@@ -2,6 +2,7 @@
 using CitizenFX.Core;
 using CitizenFX.Core.UI;
 using CitizenFX.Core.Native;
+using static CitizenFX.Core.Native.API;
 using System.Drawing;
 using TinyTween;
 
@@ -122,7 +123,7 @@ namespace FRFuel
         /// <returns></returns>
         public static PointF GetSafezoneBounds()
         {
-            float t = Function.Call<float>(Hash.GET_SAFE_ZONE_SIZE);
+            float t = GetSafeZoneSize();
             float w = Screen.Width;
             float h = Screen.Height;
 
@@ -141,7 +142,7 @@ namespace FRFuel
             buttons.CallFunction("TOGGLE_MOUSE_BUTTONS", 0);
             buttons.CallFunction("CREATE_CONTAINER");
 
-            buttons.CallFunction("SET_DATA_SLOT", 0, Function.Call<string>((Hash)0x0499D7B09FC9B407, 2, (int)FRFuel.engineToggleControl, 0), "Turn off engine");
+            buttons.CallFunction("SET_DATA_SLOT", 0, Function.Call<string>((Hash)0x0499D7B09FC9B407, 2, (int)FRFuel.engineToggleControl, false), "Turn off engine");
 
             buttons.CallFunction("DRAW_INSTRUCTIONAL_BUTTONS", -1);
         }
@@ -188,7 +189,7 @@ namespace FRFuel
             buttons.CallFunction("TOGGLE_MOUSE_BUTTONS", 0);
             buttons.CallFunction("CREATE_CONTAINER");
 
-            buttons.CallFunction("SET_DATA_SLOT", 0, Function.Call<string>((Hash)0x0499D7B09FC9B407, 2, (int)Control.Jump, 0), "Refuel");
+            buttons.CallFunction("SET_DATA_SLOT", 0, Function.Call<string>((Hash)0x0499D7B09FC9B407, 2, (int)Control.Jump, false), "Refuel");
             buttons.CallFunction("SET_DATA_SLOT", 1, Function.Call<string>((Hash)0x0499D7B09FC9B407, 2, (int)FRFuel.engineToggleControl, 0), "Turn on engine");
 
             buttons.CallFunction("DRAW_INSTRUCTIONAL_BUTTONS", -1);
@@ -204,7 +205,7 @@ namespace FRFuel
             buttons.CallFunction("TOGGLE_MOUSE_BUTTONS", 0);
             buttons.CallFunction("CREATE_CONTAINER");
 
-            buttons.CallFunction("SET_DATA_SLOT", 0, Function.Call<string>((Hash)0x0499D7B09FC9B407, 2, (int)Control.Attack, 0), label);
+            buttons.CallFunction("SET_DATA_SLOT", 0, Function.Call<string>((Hash)0x0499D7B09FC9B407, 2, (int)Control.Attack, false), label);
 
             buttons.CallFunction("DRAW_INSTRUCTIONAL_BUTTONS", -1);
         }
