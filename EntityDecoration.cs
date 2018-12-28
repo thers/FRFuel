@@ -1,6 +1,7 @@
 ﻿using System;
 using CitizenFX.Core;
 using CitizenFX.Core.Native;
+using static CitizenFX.Core.Native.API;
 
 namespace FRFuel
 {
@@ -20,7 +21,7 @@ namespace FRFuel
 
         public static bool ExistOn(Entity entity, string propertyName)
         {
-            return Function.Call<bool>(Hash.DECOR_EXIST_ON, entity.NativeValue, propertyName);
+            return DecorExistOn(entity.Handle, propertyName);
         }
 
         public static bool HasDecor(this Entity ent, string propertyName)
@@ -30,22 +31,22 @@ namespace FRFuel
 
         public static void RegisterProperty(string propertyName, DecorationType type)
         {
-            Function.Call(Hash.DECOR_REGISTER, propertyName, (int)type);
+            DecorRegister(propertyName, (int)type);
         }
 
         public static void Set(Entity entity, string propertyName, float floatValue)
         {
-            Function.Call(Hash._DECOR_SET_FLOAT, entity.NativeValue, propertyName, floatValue);
+            DecorSetFloat(entity.Handle, propertyName, floatValue);
         }
 
         public static void Set(Entity entity, string propertyName, int intValue)
         {
-            Function.Call(Hash.DECOR_SET_INT, entity.NativeValue, propertyName, intValue);
+            DecorSetInt(entity.Handle, propertyName, intValue);
         }
 
         public static void Set(Entity entity, string propertyName, bool boolValue)
         {
-            Function.Call(Hash.DECOR_SET_BOOL, entity.NativeValue, propertyName, boolValue);
+            DecorSetBool(entity.Handle, propertyName, boolValue);
         }
 
         public static void SetDecor(this Entity ent, string propertyName, float value)
@@ -71,26 +72,23 @@ namespace FRFuel
             }
 
             Type genericType = typeof(T);
-            Hash nativeMethod;
 
             if (genericType == floatType)
             {
-                nativeMethod = Hash._DECOR_GET_FLOAT;
+                return (T)(object)DecorGetFloat(entity.Handle, propertyName);
             }
             else if (genericType == intType)
             {
-                nativeMethod = Hash.DECOR_GET_INT;
+                return (T)(object)DecorGetInt(entity.Handle, propertyName);
             }
             else if (genericType == boolType)
             {
-                nativeMethod = Hash.DECOR_GET_BOOL;
+                return (T)(object)DecorGetBool(entity.Handle, propertyName);
             }
             else
             {
                 throw new EntityDecorationUndefinedTypeException();
             }
-
-            return (T)Function.Call<T>(nativeMethod, entity.NativeValue, propertyName);
         }
 
         public static T GetDecor<T>(this Entity ent, string propertyName)
