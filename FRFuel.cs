@@ -33,6 +33,7 @@ namespace FRFuel
 
         protected float fuelTankCapacity = 65f;
 
+        protected float refuelRate = 1f;
         protected float fuelConsumptionRate = 1f;
         protected float fuelAccelerationImpact = 0.0002f;
         protected float fuelTractionImpact = 0.0001f;
@@ -126,7 +127,19 @@ namespace FRFuel
 #if DEBUG
             else
             {
-                Debug.WriteLine("Invalid FuelConsumptionRate value. Make sure it is a valid float value, i.e. 1.2");
+                Debug.WriteLine("Invalid FuelConsumptionRate value. Make sure it is a valid float value, e.g. 1.2");
+            }
+#endif
+
+            var refuelRateString = Config.Get("RefuelRate", "1");
+            if (float.TryParse(refuelRateString, out float tmpRefuelRate))
+            {
+                refuelRate = tmpRefuelRate;
+            }
+#if DEBUG
+            else
+            {
+                Debug.WriteLine("Invalid RefuelRate value. Make sure it is a valid float value, e.g. 1.2");
             }
 #endif
 
@@ -394,8 +407,10 @@ namespace FRFuel
                         {
                             if (fuel < fuelTankCapacity)
                             {
-                                fuel += 0.1f;
-                                addedFuelCapacitor += 0.1f;
+                                float fuelPortion = 0.1f * refuelRate;
+
+                                fuel += fuelPortion;
+                                addedFuelCapacitor += fuelPortion;
                             }
                         }
 
