@@ -205,7 +205,13 @@ namespace FRFuel
                     if (!pickups.Any(pickup => position.DistanceToSquared(pickup.Position) < 5f))
                     {
                         // add pickup if one doesn't exist within 5f proximity of it
-                        int pickupHandle = CreatePickup(0xc69de3ff, position.X, position.Y, position.Z - 0.5f, 8 | 32, 0, true, (uint)model);
+                        int pickupHandle = CreatePickup(
+                            0xc69de3ff, // Petrol Can
+                            position.X, position.Y, position.Z - 0.5f,
+                            8 | 32, // Place on the ground, local only
+                            0,
+                            true,
+                            (uint)model);
 
                         Pickup pickup = new Pickup(pickupHandle);
 
