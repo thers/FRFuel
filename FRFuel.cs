@@ -453,7 +453,12 @@ namespace FRFuel
         {
             // Prevent the player from honking the horn whenever trying to toggle the engine.
             if (engineToggleControl == Control.VehicleHorn)
+            {
                 Game.DisableControlThisFrame(0, Control.VehicleHorn);
+
+                // Also disable the rocket boost control for DLC cars.
+                Game.DisableControlThisFrame(0, (Control)351); // INPUT_VEH_ROCKET_BOOST (E on keyboard, L3 on controller)
+            }
 
             if (Game.IsControlJustReleased(0, engineToggleControl) && !Game.IsControlPressed(0, Control.Jump))
             {
