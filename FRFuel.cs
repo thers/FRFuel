@@ -58,6 +58,7 @@ namespace FRFuel
 
         protected Config Config { get; set; }
         protected bool showHud = true;
+        protected bool showHudWhenEngineOff = true;
 
         protected bool initialized = false;
         public static Control engineToggleControl = Control.VehicleHorn;
@@ -118,7 +119,8 @@ namespace FRFuel
             Config = new Config(configContent);
 
             showHud = Config.Get("ShowHud", "true") == "true";
-            
+            showHudWhenEngineOff = Config.Get("ShowHudWhenEngineOff", "true").ToLower() == "true";
+
             var fuelConsumptionString = Config.Get("FuelConsumptionRate", "1");
             if (float.TryParse(fuelConsumptionString, out float tmpFuelConsumptionRate))
             {
@@ -214,7 +216,8 @@ namespace FRFuel
             }
             else
             {
-                positions.ToList().ForEach(position => {
+                positions.ToList().ForEach(position =>
+                {
                     if (!pickups.Any(pickup => position.DistanceToSquared(pickup.Position) < 5f))
                     {
                         // add pickup if one doesn't exist within 5f proximity of it
@@ -365,7 +368,7 @@ namespace FRFuel
                 consumedFuel += normalizedRPMValue * fuelRPMImpact;
                 consumedFuel += vehicle.Acceleration * fuelAccelerationImpact;
                 consumedFuel += vehicle.MaxTraction * fuelTractionImpact;
-                
+
                 fuel -= consumedFuel * fuelConsumptionRate;
                 fuel = fuel < 0f ? 0f : fuel;
             }
@@ -472,11 +475,6 @@ namespace FRFuel
         /// <param name="playerPed"></param>
         public void RenderUI(Ped playerPed)
         {
-            if (showHud && API.IsHudPreferenceSwitchedOn())
-            {
-                hud.RenderBar(playerPed.CurrentVehicle.FuelLevel, fuelTankCapacity);
-            }
-
             var gasStationIndex = GetGasStationIndexInRange(playerPed.Position, showMarkerInRangeSquared);
 
             if (gasStationIndex != -1)
@@ -493,6 +491,29 @@ namespace FRFuel
                 {
                     // Lost gas station in range
                     currentGasStationIndex = -1;
+                }
+            }
+
+            if (showHud && IsHudPreferenceSwitchedOn())
+            {
+                // If not near any pump.
+                if (currentGasStationIndex == -1)
+                {
+                    // If the engine is on, then display it no matter the config option.
+                    if (playerPed.CurrentVehicle.IsEngineRunning)
+                    {
+                        hud.RenderBar(playerPed.CurrentVehicle.FuelLevel, fuelTankCapacity);
+                    }
+                    // If the engine is not running, then only display it if ShowHudWhenEngineOff is true.
+                    else if (showHudWhenEngineOff)
+                    {
+                        hud.RenderBar(playerPed.CurrentVehicle.FuelLevel, fuelTankCapacity);
+                    }
+                }
+                // If near a pump, always display the hud bar.
+                else
+                {
+                    hud.RenderBar(playerPed.CurrentVehicle.FuelLevel, fuelTankCapacity);
                 }
             }
         }
