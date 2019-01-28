@@ -451,6 +451,10 @@ namespace FRFuel
         /// <param name="vehicle"></param>
         public void ControlEngine(Vehicle vehicle)
         {
+            // Prevent the player from honking the horn whenever trying to toggle the engine.
+            if (engineToggleControl == Control.VehicleHorn)
+                Game.DisableControlThisFrame(0, Control.VehicleHorn);
+
             if (Game.IsControlJustReleased(0, engineToggleControl) && !Game.IsControlPressed(0, Control.Jump))
             {
                 if (vehicle.IsEngineRunning)
