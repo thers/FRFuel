@@ -616,55 +616,57 @@ namespace FRFuel
             {
                 Vector3 pos = playerPed.Position;
 
-                int vehicleHandle = GetClosestVehicle(pos.X, pos.Y, pos.Z, 3f, 0, 70);
-                Vehicle vehicle = new Vehicle(vehicleHandle);
-
-                if (
-                  vehicleHandle != 0 &&
-                  vehicle.HasDecor(fuelLevelPropertyName)
-                )
+                if (IsAnyVehicleNearPoint(pos.X, pos.Y, pos.Z, 3f))
                 {
-                    float max = VehicleMaxFuelLevel(vehicle);
-                    float current = VehicleFuelLevel(vehicle);
+                    Vehicle vehicle = World.GetAllVehicles().OrderBy(v => v.Position.DistanceToSquared(pos)).First();
 
-                    if (max - current < 0.5f)
+                    if (
+                      vehicle != null &&
+                      vehicle.Exists() &&
+                      vehicle.HasDecor(fuelLevelPropertyName)
+                    )
                     {
-                        hud.InstructManualRefuel("Fuel tank is full");
-                    }
-                    else
-                    {
-                        hud.InstructManualRefuel("Manual refueling");
-                    }
+                        float max = VehicleMaxFuelLevel(vehicle);
+                        float current = VehicleFuelLevel(vehicle);
 
-                    if (Game.IsControlPressed(0, Control.Attack))
-                    {
-                        jerryCanAnimation.Magick(playerPed);
-
-                        if (current < max)
+                        if (max - current < 0.5f)
                         {
-                            if (current + 0.1f >= max)
+                            hud.InstructManualRefuel("Fuel tank is full");
+                        }
+                        else
+                        {
+                            hud.InstructManualRefuel("Manual refueling");
+                        }
+
+                        if (Game.IsControlPressed(0, Control.Attack))
+                        {
+                            jerryCanAnimation.Magick(playerPed);
+
+                            if (current < max)
                             {
-                                VehicleSetFuelLevel(vehicle, max);
-                            }
-                            else
-                            {
-                                VehicleSetFuelLevel(vehicle, current + 0.2f);
+                                if (current + 0.1f >= max)
+                                {
+                                    VehicleSetFuelLevel(vehicle, max);
+                                }
+                                else
+                                {
+                                    VehicleSetFuelLevel(vehicle, current + 0.2f);
+                                }
                             }
                         }
-                    }
 
-                    if (Game.IsControlJustReleased(0, Control.VehicleAttack))
-                    {
-                        jerryCanAnimation.RewindAndStop(playerPed);
-                    }
+                        if (Game.IsControlJustReleased(0, Control.VehicleAttack))
+                        {
+                            jerryCanAnimation.RewindAndStop(playerPed);
+                        }
 
-                    hud.RenderInstructions();
-                    PlayHUDAppearSound();
-                    hudActive = true;
-                    return;
+                        hud.RenderInstructions();
+                        PlayHUDAppearSound();
+                        hudActive = true;
+                        return;
+                    }
                 }
             }
-
             hudActive = false;
         }
 
