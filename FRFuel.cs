@@ -58,6 +58,7 @@ namespace FRFuel
 
         protected Config Config { get; set; }
         protected bool showHud = true;
+        protected bool showHudWhenEngineOff = true;
 
         protected bool initialized = false;
         public static Control engineToggleControl = Control.VehicleHorn;
@@ -118,7 +119,8 @@ namespace FRFuel
             Config = new Config(configContent);
 
             showHud = Config.Get("ShowHud", "true") == "true";
-            
+            showHudWhenEngineOff = Config.Get("ShowHudWhenEngineOff", "true").ToLower() == "true";
+
             var fuelConsumptionString = Config.Get("FuelConsumptionRate", "1");
             if (float.TryParse(fuelConsumptionString, out float tmpFuelConsumptionRate))
             {
@@ -214,7 +216,8 @@ namespace FRFuel
             }
             else
             {
-                positions.ToList().ForEach(position => {
+                positions.ToList().ForEach(position =>
+                {
                     if (!pickups.Any(pickup => position.DistanceToSquared(pickup.Position) < 5f))
                     {
                         // add pickup if one doesn't exist within 5f proximity of it
@@ -365,7 +368,7 @@ namespace FRFuel
                 consumedFuel += normalizedRPMValue * fuelRPMImpact;
                 consumedFuel += vehicle.Acceleration * fuelAccelerationImpact;
                 consumedFuel += vehicle.MaxTraction * fuelTractionImpact;
-                
+
                 fuel -= consumedFuel * fuelConsumptionRate;
                 fuel = fuel < 0f ? 0f : fuel;
             }
@@ -448,6 +451,15 @@ namespace FRFuel
         /// <param name="vehicle"></param>
         public void ControlEngine(Vehicle vehicle)
         {
+            // Prevent the player from honking the horn whenever trying to toggle the engine.
+            if (engineToggleControl == Control.VehicleHorn)
+            {
+                Game.DisableControlThisFrame(0, Control.VehicleHorn);
+
+                // Also disable the rocket boost control for DLC cars.
+                Game.DisableControlThisFrame(0, (Control)351); // INPUT_VEH_ROCKET_BOOST (E on keyboard, L3 on controller)
+            }
+
             if (Game.IsControlJustReleased(0, engineToggleControl) && !Game.IsControlPressed(0, Control.Jump))
             {
                 if (vehicle.IsEngineRunning)
@@ -472,11 +484,6 @@ namespace FRFuel
         /// <param name="playerPed"></param>
         public void RenderUI(Ped playerPed)
         {
-            if (showHud && API.IsHudPreferenceSwitchedOn())
-            {
-                hud.RenderBar(playerPed.CurrentVehicle.FuelLevel, fuelTankCapacity);
-            }
-
             var gasStationIndex = GetGasStationIndexInRange(playerPed.Position, showMarkerInRangeSquared);
 
             if (gasStationIndex != -1)
@@ -493,6 +500,29 @@ namespace FRFuel
                 {
                     // Lost gas station in range
                     currentGasStationIndex = -1;
+                }
+            }
+
+            if (showHud && IsHudPreferenceSwitchedOn())
+            {
+                // If not near any pump.
+                if (currentGasStationIndex == -1)
+                {
+                    // If the engine is on, then display it no matter the config option.
+                    if (playerPed.CurrentVehicle.IsEngineRunning)
+                    {
+                        hud.RenderBar(playerPed.CurrentVehicle.FuelLevel, fuelTankCapacity);
+                    }
+                    // If the engine is not running, then only display it if ShowHudWhenEngineOff is true.
+                    else if (showHudWhenEngineOff)
+                    {
+                        hud.RenderBar(playerPed.CurrentVehicle.FuelLevel, fuelTankCapacity);
+                    }
+                }
+                // If near a pump, always display the hud bar.
+                else
+                {
+                    hud.RenderBar(playerPed.CurrentVehicle.FuelLevel, fuelTankCapacity);
                 }
             }
         }
@@ -586,55 +616,57 @@ namespace FRFuel
             {
                 Vector3 pos = playerPed.Position;
 
-                int vehicleHandle = GetClosestVehicle(pos.X, pos.Y, pos.Z, 3f, 0, 70);
-                Vehicle vehicle = new Vehicle(vehicleHandle);
-
-                if (
-                  vehicleHandle != 0 &&
-                  vehicle.HasDecor(fuelLevelPropertyName)
-                )
+                if (IsAnyVehicleNearPoint(pos.X, pos.Y, pos.Z, 3f))
                 {
-                    float max = VehicleMaxFuelLevel(vehicle);
-                    float current = VehicleFuelLevel(vehicle);
+                    Vehicle vehicle = World.GetAllVehicles().OrderBy(v => v.Position.DistanceToSquared(pos)).First();
 
-                    if (max - current < 0.5f)
+                    if (
+                      vehicle != null &&
+                      vehicle.Exists() &&
+                      vehicle.HasDecor(fuelLevelPropertyName)
+                    )
                     {
-                        hud.InstructManualRefuel("Fuel tank is full");
-                    }
-                    else
-                    {
-                        hud.InstructManualRefuel("Manual refueling");
-                    }
+                        float max = VehicleMaxFuelLevel(vehicle);
+                        float current = VehicleFuelLevel(vehicle);
 
-                    if (Game.IsControlPressed(0, Control.Attack))
-                    {
-                        jerryCanAnimation.Magick(playerPed);
-
-                        if (current < max)
+                        if (max - current < 0.5f)
                         {
-                            if (current + 0.1f >= max)
+                            hud.InstructManualRefuel("Fuel tank is full");
+                        }
+                        else
+                        {
+                            hud.InstructManualRefuel("Manual refueling");
+                        }
+
+                        if (Game.IsControlPressed(0, Control.Attack))
+                        {
+                            jerryCanAnimation.Magick(playerPed);
+
+                            if (current < max)
                             {
-                                VehicleSetFuelLevel(vehicle, max);
-                            }
-                            else
-                            {
-                                VehicleSetFuelLevel(vehicle, current + 0.2f);
+                                if (current + 0.1f >= max)
+                                {
+                                    VehicleSetFuelLevel(vehicle, max);
+                                }
+                                else
+                                {
+                                    VehicleSetFuelLevel(vehicle, current + 0.2f);
+                                }
                             }
                         }
-                    }
 
-                    if (Game.IsControlJustReleased(0, Control.VehicleAttack))
-                    {
-                        jerryCanAnimation.RewindAndStop(playerPed);
-                    }
+                        if (Game.IsControlJustReleased(0, Control.VehicleAttack))
+                        {
+                            jerryCanAnimation.RewindAndStop(playerPed);
+                        }
 
-                    hud.RenderInstructions();
-                    PlayHUDAppearSound();
-                    hudActive = true;
-                    return;
+                        hud.RenderInstructions();
+                        PlayHUDAppearSound();
+                        hudActive = true;
+                        return;
+                    }
                 }
             }
-
             hudActive = false;
         }
 
