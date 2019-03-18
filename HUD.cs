@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using CitizenFX.Core;
 using CitizenFX.Core.UI;
 using CitizenFX.Core.Native;
@@ -18,9 +18,9 @@ namespace FRFuel
         protected Color fuelBarColourNormal;
         protected Color fuelBarColourWarning;
 
-        protected Rectangle fuelBarBackdrop;
-        protected Rectangle fuelBarBack;
-        protected Rectangle fuelBar;
+        protected CitizenFX.Core.UI.Rectangle fuelBarBackdrop;
+        protected CitizenFX.Core.UI.Rectangle fuelBarBack;
+        protected CitizenFX.Core.UI.Rectangle fuelBar;
 
         protected Tween<float> fuelBarColorTween = new FloatTween();
         protected bool fuelBarAnimationDir = true;
@@ -52,9 +52,9 @@ namespace FRFuel
             fuelBarColourNormal = Color.FromArgb(150, 255, 179, 0);
             fuelBarColourWarning = Color.FromArgb(255, 255, 245, 220);
 
-            fuelBarBackdrop = new Rectangle(fuelBarBackdropPosition, fuelBarBackdropSize, fuelBarBackdropColour);
-            fuelBarBack = new Rectangle(fuelBarBackPosition, fuelBarBackSize, fuelBarBackColour);
-            fuelBar = new Rectangle(fuelBarPosition, fuelBarSize, fuelBarColourNormal);
+            fuelBarBackdrop = new CitizenFX.Core.UI.Rectangle(fuelBarBackdropPosition, fuelBarBackdropSize, fuelBarBackdropColour);
+            fuelBarBack = new CitizenFX.Core.UI.Rectangle(fuelBarBackPosition, fuelBarBackSize, fuelBarBackColour);
+            fuelBar = new CitizenFX.Core.UI.Rectangle(fuelBarPosition, fuelBarSize, fuelBarColourNormal);
         }
 
         /// <summary>
