@@ -53,12 +53,28 @@ namespace FRFuel
             Color fuelBarBackdropColour = Color.FromArgb(100, 0, 0, 0);
             Color fuelBarBackColour = Color.FromArgb(50, 255, 179, 0);
 
+            /// Default colors will be changed in the <see cref="FRFuel.LoadConfig"/> function, by calling the <see cref="UpdateBarColors"/> function.
             fuelBarColourNormal = Color.FromArgb(150, 255, 179, 0);
             fuelBarColourWarning = Color.FromArgb(255, 255, 245, 220);
 
             fuelBarBackdrop = new CitizenFX.Core.UI.Rectangle(fuelBarBackdropPosition, fuelBarBackdropSize, fuelBarBackdropColour);
             fuelBarBack = new CitizenFX.Core.UI.Rectangle(fuelBarBackPosition, fuelBarBackSize, fuelBarBackColour);
             fuelBar = new CitizenFX.Core.UI.Rectangle(fuelBarPosition, fuelBarSize, fuelBarColourNormal);
+        }
+
+        /// <summary>
+        /// Updates the <see cref="fuelBarColourNormal"/> and <see cref="fuelBarColourWarning"/> colors.
+        /// </summary>
+        /// <param name="red"></param>
+        /// <param name="green"></param>
+        /// <param name="blue"></param>
+        /// <param name="warningRed"></param>
+        /// <param name="warningGreen"></param>
+        /// <param name="warningBlue"></param>
+        public void UpdateBarColors(int red, int green, int blue, int warningRed, int warningGreen, int warningBlue)
+        {
+            fuelBarColourNormal = Color.FromArgb(150, red, green, blue);
+            fuelBarColourWarning = Color.FromArgb(255, warningRed, warningGreen, warningBlue);
         }
 
         /// <summary>
