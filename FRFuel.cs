@@ -252,6 +252,7 @@ namespace FRFuel
                     }
                 });
             }
+            await Task.FromResult(0);
         }
         #endregion
 
