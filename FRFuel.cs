@@ -62,6 +62,9 @@ namespace FRFuel
 
         protected bool initialized = false;
         public static Control engineToggleControl = Control.VehicleHorn;
+
+        private string fuelBarNormalHexColor = "FFB300"; // 255, 179, 0
+        private string fuelBarWarningHexColor = "FFF5DC"; // 255, 179, 0
         #endregion
 
         /// <summary>
@@ -150,6 +153,20 @@ namespace FRFuel
             {
                 engineToggleControl = (Control)tmpControl;
             }
+
+            fuelBarNormalHexColor = Config.Get("FuelBarNormalColor", fuelBarNormalHexColor).Replace("\"", "").Replace("#", "");
+            // normal color
+            int r = MathUtil.Clamp(int.Parse(fuelBarNormalHexColor.Substring(0, 2), System.Globalization.NumberStyles.HexNumber), 0, 255);
+            int g = MathUtil.Clamp(int.Parse(fuelBarNormalHexColor.Substring(2, 2), System.Globalization.NumberStyles.HexNumber), 0, 255);
+            int b = MathUtil.Clamp(int.Parse(fuelBarNormalHexColor.Substring(4, 2), System.Globalization.NumberStyles.HexNumber), 0, 255);
+
+            fuelBarWarningHexColor = Config.Get("FuelBarWarningColor", fuelBarNormalHexColor).Replace("\"", "").Replace("#", "");
+            // warning color
+            int wR = MathUtil.Clamp(int.Parse(fuelBarWarningHexColor.Substring(0, 2), System.Globalization.NumberStyles.HexNumber), 0, 255);
+            int wG = MathUtil.Clamp(int.Parse(fuelBarWarningHexColor.Substring(2, 2), System.Globalization.NumberStyles.HexNumber), 0, 255);
+            int wB = MathUtil.Clamp(int.Parse(fuelBarWarningHexColor.Substring(4, 2), System.Globalization.NumberStyles.HexNumber), 0, 255);
+            hud.UpdateBarColors(r, g, b, wR, wG, wB);
+
 #if DEBUG
             Debug.WriteLine($"CreatePickups: {Config.Get("CreatePickups", "true")}");
             Debug.WriteLine($"ShowHud: {Config.Get("ShowHud", "true")}");
@@ -235,6 +252,7 @@ namespace FRFuel
                     }
                 });
             }
+            await Task.FromResult(0);
         }
         #endregion
 

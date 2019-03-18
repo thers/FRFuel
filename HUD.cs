@@ -12,19 +12,23 @@ namespace FRFuel
     {
         protected Scaleform buttons = new Scaleform("instructional_buttons");
 
-        protected float fuelBarWidth = GetBarWidth();
+        protected float fuelBarWidth() { return GetBarWidth(); }
         protected float fuelBarHeight = 6f;
 
         protected Color fuelBarColourNormal;
         protected Color fuelBarColourWarning;
 
-        protected Rectangle fuelBarBackdrop;
-        protected Rectangle fuelBarBack;
-        protected Rectangle fuelBar;
+        protected CitizenFX.Core.UI.Rectangle fuelBarBackdrop;
+        protected CitizenFX.Core.UI.Rectangle fuelBarBack;
+        protected CitizenFX.Core.UI.Rectangle fuelBar;
 
         protected Tween<float> fuelBarColorTween = new FloatTween();
         protected bool fuelBarAnimationDir = true;
         protected PointF basePosition = new PointF(0f, 584f);
+
+        protected SizeF fuelBarBackdropSize;
+        protected SizeF fuelBarBackSize;
+        protected SizeF fuelBarSize;
 
         public PointF Position
         {
@@ -42,19 +46,35 @@ namespace FRFuel
             PointF fuelBarBackPosition = new PointF(fuelBarBackdropPosition.X, fuelBarBackdropPosition.Y + 3f);
             PointF fuelBarPosition = fuelBarBackPosition;
 
-            SizeF fuelBarBackdropSize = new SizeF(fuelBarWidth, 12f);
-            SizeF fuelBarBackSize = new SizeF(fuelBarWidth, fuelBarHeight);
-            SizeF fuelBarSize = fuelBarBackSize;
+            fuelBarBackdropSize = new SizeF(fuelBarWidth(), 12f);
+            fuelBarBackSize = new SizeF(fuelBarWidth(), fuelBarHeight);
+            fuelBarSize = fuelBarBackSize;
 
             Color fuelBarBackdropColour = Color.FromArgb(100, 0, 0, 0);
             Color fuelBarBackColour = Color.FromArgb(50, 255, 179, 0);
 
+            /// Default colors will be changed in the <see cref="FRFuel.LoadConfig"/> function, by calling the <see cref="UpdateBarColors"/> function.
             fuelBarColourNormal = Color.FromArgb(150, 255, 179, 0);
             fuelBarColourWarning = Color.FromArgb(255, 255, 245, 220);
 
-            fuelBarBackdrop = new Rectangle(fuelBarBackdropPosition, fuelBarBackdropSize, fuelBarBackdropColour);
-            fuelBarBack = new Rectangle(fuelBarBackPosition, fuelBarBackSize, fuelBarBackColour);
-            fuelBar = new Rectangle(fuelBarPosition, fuelBarSize, fuelBarColourNormal);
+            fuelBarBackdrop = new CitizenFX.Core.UI.Rectangle(fuelBarBackdropPosition, fuelBarBackdropSize, fuelBarBackdropColour);
+            fuelBarBack = new CitizenFX.Core.UI.Rectangle(fuelBarBackPosition, fuelBarBackSize, fuelBarBackColour);
+            fuelBar = new CitizenFX.Core.UI.Rectangle(fuelBarPosition, fuelBarSize, fuelBarColourNormal);
+        }
+
+        /// <summary>
+        /// Updates the <see cref="fuelBarColourNormal"/> and <see cref="fuelBarColourWarning"/> colors.
+        /// </summary>
+        /// <param name="red"></param>
+        /// <param name="green"></param>
+        /// <param name="blue"></param>
+        /// <param name="warningRed"></param>
+        /// <param name="warningGreen"></param>
+        /// <param name="warningBlue"></param>
+        public void UpdateBarColors(int red, int green, int blue, int warningRed, int warningGreen, int warningBlue)
+        {
+            fuelBarColourNormal = Color.FromArgb(150, red, green, blue);
+            fuelBarColourWarning = Color.FromArgb(255, warningRed, warningGreen, warningBlue);
         }
 
         /// <summary>
@@ -77,12 +97,24 @@ namespace FRFuel
             float fuelLevelPercentage = (100f / maxFuelLevel) * currentFuelLevel;
             PointF safeZone = GetSafezoneBounds();
 
-            Position = new PointF(basePosition.X + safeZone.X, basePosition.Y - safeZone.Y);
+            if (IsBigmapActive())
+            {
+                Position = new PointF(basePosition.X + safeZone.X, basePosition.Y - safeZone.Y - 180f);
+            }
+            else
+            {
+                Position = new PointF(basePosition.X + safeZone.X, basePosition.Y - safeZone.Y);
+            }
 
-            fuelBar.Size = new SizeF(
-              (fuelBarWidth / 100f) * fuelLevelPercentage,
-              fuelBarHeight
-            );
+            fuelBarBackdropSize = new SizeF(fuelBarWidth(), 12f);
+            fuelBarSize = new SizeF((fuelBarWidth() / 100f) * fuelLevelPercentage, fuelBarHeight);
+            fuelBarBackSize = fuelBarSize;
+
+            fuelBar.Size = fuelBarSize;
+            fuelBarBackdrop.Size = fuelBarBackdropSize;
+            fuelBarBack.Size = fuelBarBackSize;
+
+
 
             if (maxFuelLevel > 0 && currentFuelLevel < 9f)
             {
@@ -155,26 +187,27 @@ namespace FRFuel
         {
             float width;
             double aspect = Screen.AspectRatio;
+            bool bigMap = IsBigmapActive();
 
             switch (aspect)
             {
                 case (float)1.5: // 3:2
-                    width = 212f;
+                    width = bigMap ? 336f : 212f;
                     break;
                 case (float)1.33333337306976: // 4:3
-                    width = 240f;
+                    width = bigMap ? 378f : 240f;
                     break;
                 case (float)1.66666662693024: // 5:3
-                    width = 191f;
+                    width = bigMap ? 302f : 191f;
                     break;
                 case (float)1.25: // 5:4
-                    width = 255f;
+                    width = bigMap ? 405f : 255f;
                     break;
                 case (float)1.60000002384186: // 16:10
-                    width = 200f;
+                    width = bigMap ? 316f : 200f;
                     break;
                 default:
-                    width = 180f; // 16:9
+                    width = bigMap ? 285f : 180f; // 16:9
                     break;
             }
             return width;
