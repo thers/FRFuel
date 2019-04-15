@@ -1,0 +1,17 @@
+{
+  "showBlips": true,
+  "createPickups": true,
+  "showHud": true,
+  "showHudWhenEngineOff": false,
+  "fuelTankCapacityOverride": 65,
+  "fuelConsumptionRate": 1.0,
+  "fuelAccelerationImpact": 0.0002,
+  "fuelTractionImpact": 0.0001,
+  "fuelRPMImpact": 0.0005,
+  "fuelSpeedImpact": 0.005,
+  "refuelRate": 1,
+  "allowManualRefills": false,
+  "engineToggleKey": 86,
+  "fuelBarColor": "#FFB300",
+  "fuelBarLowColor": "#FFF5DC"
+}

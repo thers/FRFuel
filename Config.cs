@@ -1,44 +1,49 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Newtonsoft.Json;
+using System;
+using CitizenFX.Core;
+using CitizenFX.Core.Native;
+using System.IO;
 
 namespace FRFuel
 {
-    public class Config
+    class Config
     {
-        protected Dictionary<string, string> Entries { get; set; }
+        private static Config _instance;
 
-        public Config(string content)
+        public static Config GetInstance()
         {
-            Entries = new Dictionary<string, string>();
-
-            if (content == null || content.Length == 0)
+            if (_instance == null)
             {
-                return;
-            }
+                try
+                {
+                    string json = API.LoadResourceFile(API.GetCurrentResourceName(), "config.json");
+                    _instance = JsonConvert.DeserializeObject<Config>(json);
+                }
 
-            var splitted = content
-                .Split('\n')
-                .Where((line) => !line.Trim().StartsWith("#"))
-                .Select((line) => line.Trim().Split('='))
-                .Where((line) => line.Length == 2);
-
-            foreach (var tuple in splitted)
-            {
-                Entries.Add(tuple[0], tuple[1]);
+                catch (Exception ex)
+                {
+                    _instance = new Config();
+                    Debug.WriteLine($"[FRFuel] Failed to load config: {ex.Message}");
+                }
             }
+            return _instance;
         }
 
-        public string Get(string key, string defaultValue = null)
-        {
-            if (Entries.ContainsKey(key))
-            {
-                return Entries[key];
-            }
-
-            return defaultValue;
-        }
+        //Defaults
+        public bool ShowBlips { get; set; } = true;
+        public bool CreatePickups { get; set; } = true;
+        public bool ShowHud { get; set; } = true;
+        public bool ShowHudWhenEngineOff { get; set; } = true;
+        public float? FuelTankCapacityOverride { get; set; } = null;
+        public float FuelConsumptionRate { get; set; } = 1f;
+        public float FuelAccelerationImpact { get; set; } = 0.0002f;
+        public float FuelTractionImpact { get; set; } = 0.0001f;
+        public float FuelRPMImpact { get; set; } = 0.0005f;
+        public float FuelSpeedImpact { get; set; } = 0.0002f;
+        public float RefuelRate { get; set; } = 1f;
+        public bool AllowManualRefills { get; set; } = false;
+        public int EngineToggleKey { get; set; } = 86;
+        public string FuelBarColor { get; set; }
+        public string FuelBarLowColor { get; set; }
     }
 }
