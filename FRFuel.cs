@@ -37,8 +37,6 @@ namespace FRFuel
         private static Random _random = new Random();
         private static bool hudActive = false;
 
-        //private static float _vehicleFuel = -1;
-        //private static float _vehicleMaxFuel = -1;
         private static float addedFuelCapacitor = 0f;
         private bool refuelAllowed = true;
 

@@ -29,8 +29,8 @@ namespace FRFuel
         private static Color fuelBarBackdropColor = Color.FromArgb(100, 0, 0, 0);
         private static Color fuelBarBackColor = Color.FromArgb(50, 255, 179, 0);
 
-        private static Color fuelBarNormalColor = Config.GetInstance().FuelBarColor != null ? Color.FromArgb(Int32.Parse(Config.GetInstance().FuelBarColor.Replace("#", ""), NumberStyles.HexNumber)) : Color.FromArgb(150, 255, 179, 0);
-        private static Color fuelBarWarningColor = Config.GetInstance().FuelBarLowColor != null ? Color.FromArgb(Int32.Parse(Config.GetInstance().FuelBarLowColor.Replace("#", ""), NumberStyles.HexNumber)) : Color.FromArgb(255, 255, 245, 220);
+        private static Color fuelBarColourNormal = Config.GetInstance().FuelBarColor != null ? Color.FromArgb(Int32.Parse(Config.GetInstance().FuelBarColor.Replace("#", ""), NumberStyles.HexNumber)) : Color.FromArgb(150, 255, 179, 0);
+        private static Color fuelBarColourWarning = Config.GetInstance().FuelBarLowColor != null ? Color.FromArgb(Int32.Parse(Config.GetInstance().FuelBarLowColor.Replace("#", ""), NumberStyles.HexNumber)) : Color.FromArgb(255, 255, 245, 220);
 
         private static PointF Position
         {
@@ -57,17 +57,17 @@ namespace FRFuel
         /// </summary>
         /// <param name="currentFuelLevel"></param>
         /// <param name="maxFuelLevel"></param>
-        public static void RenderBar(float currentFuelLevel, float maxFuel)
+        public static void RenderBar(float currentFuelLevel, float maxFuelLevel)
         {
             var fuelBarSize = new SizeF(GetBarWidth(), fuelBarHeight);
             var fuelBarBackdropSize = new SizeF(GetBarWidth(), 12f);
 
             fuelBarBackdrop = new CitizenFX.Core.UI.Rectangle(fuelBarBackdropPosition, fuelBarBackdropSize, fuelBarBackdropColor);
             fuelBarBack = new CitizenFX.Core.UI.Rectangle(fuelBarPosition, fuelBarSize, fuelBarBackColor);
-            fuelBar = new CitizenFX.Core.UI.Rectangle(fuelBarPosition, fuelBarSize, fuelBarNormalColor);
+            fuelBar = new CitizenFX.Core.UI.Rectangle(fuelBarPosition, fuelBarSize, fuelBarColourNormal);
 
 
-            float fuelLevelPercentage = (100f / maxFuel) * currentFuelLevel;
+            float fuelLevelPercentage = (100f / maxFuelLevel) * currentFuelLevel;
             PointF safeZone = GetSafezoneBounds();
 
             if (API.IsBigmapActive())
@@ -85,7 +85,7 @@ namespace FRFuel
             fuelBarBackdrop.Size = fuelBarBackdropSize;
             fuelBarBack.Size = fuelBarSize;
 
-            if (maxFuel > 0 && currentFuelLevel < 9f)
+            if (maxFuelLevel > 0 && currentFuelLevel < 9f)
             {
                 if (fuelBarColorTween.State == TweenState.Stopped)
                 {
@@ -101,11 +101,11 @@ namespace FRFuel
 
                 fuelBarColorTween.Update(Game.LastFrameTime);
 
-                fuelBar.Color = Color.FromArgb((int)Math.Floor(fuelBarColorTween.CurrentValue), fuelBarWarningColor);
+                fuelBar.Color = Color.FromArgb((int)Math.Floor(fuelBarColorTween.CurrentValue), fuelBarColourWarning);
             }
             else
             {
-                fuelBar.Color = fuelBarNormalColor;
+                fuelBar.Color = fuelBarColourNormal;
 
                 if (fuelBarColorTween.State != TweenState.Stopped)
                 {
