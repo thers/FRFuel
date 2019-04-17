@@ -73,10 +73,11 @@ namespace FRFuel
         {
             if (API.GetCurrentResourceName() != resourceName) return;
 
-            foreach (var station in GasStations.GetInstance())
+            if (Config.GetInstance().ShowBlips)
             {
-                if (Config.GetInstance().ShowBlips)
+                foreach (var station in GasStations.GetInstance())
                 {
+
                     var blip = World.CreateBlip(station.Coordinates);
                     blip.Sprite = BlipSprite.JerryCan;
                     blip.Color = BlipColor.White;
