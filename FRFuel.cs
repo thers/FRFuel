@@ -50,6 +50,7 @@ namespace FRFuel
         protected bool currentVehicleFuelLevelInitialized = false;
         protected bool hudActive = false;
         protected bool refuelAllowed = true;
+        protected bool initVehicles = false;
         protected float addedFuelCapacitor = 0f;
 
         protected InLoopOutAnimation jerryCanAnimation;
@@ -123,6 +124,7 @@ namespace FRFuel
 
             showHud = Config.Get("ShowHud", "true") == "true";
             showHudWhenEngineOff = Config.Get("ShowHudWhenEngineOff", "true").ToLower() == "true";
+            initVehicles = Config.Get("InitVehicleFuel", "false") == "true";
 
             var fuelConsumptionString = Config.Get("FuelConsumptionRate", "1");
             if (float.TryParse(fuelConsumptionString, out float tmpFuelConsumptionRate))
@@ -432,6 +434,7 @@ namespace FRFuel
 
                                 fuel += fuelPortion;
                                 addedFuelCapacitor += fuelPortion;
+                                TriggerEvent("frfuel:fuelAddedContinuous", fuelPortion, fuel, fuelTankCapacity);
                             }
                         }
 
@@ -742,7 +745,7 @@ namespace FRFuel
                     currentVehicleFuelLevelInitialized = false;
                 }
 
-                if (!currentVehicleFuelLevelInitialized)
+                if (!currentVehicleFuelLevelInitialized && initVehicles)
                 {
                     InitFuel(vehicle);
                 }

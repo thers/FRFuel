@@ -14,7 +14,7 @@ namespace FRFuel
         {
             Entries = new Dictionary<string, string>();
 
-            if (content == null || content.Length == 0)
+            if (string.IsNullOrEmpty(content))
             {
                 return;
             }
