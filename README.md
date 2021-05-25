@@ -14,5 +14,5 @@
 ## Installation
 
 Download `zip` archive from [latest artifacts](https://ci.appveyor.com/project/thers/frfuel/build/artifacts) and unzip it to your resources folder.
-Set to autostart in your config file `start frfuel`.
+Set to autostart in your config file `start FRFuel`.
 You're all set. Have fun.
