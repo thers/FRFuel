@@ -191,7 +191,7 @@ namespace FRFuel
             {
                 var blip = World.CreateBlip(GasStations.positions[i]);
                 blip.Sprite = BlipSprite.JerryCan;
-                blip.Color = BlipColor.White;
+                blip.Color = BlipColor.Red;
                 blip.Scale = 1f;
                 blip.IsShortRange = true;
                 blip.Name = "Gas Station";
